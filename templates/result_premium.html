@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ result_title|default("Premium munosabat tahlili", true) }}</title>
+    <style>
+      :root {
+        --bg: #f6efff;
+        --card: #ffffff;
+        --ink: #201335;
+        --muted: #716883;
+        --primary: #7c3aed;
+        --primary-dark: #5b21b6;
+        --gold: #f59e0b;
+        --gold-soft: #fff7df;
+        --pink: #fff0f7;
+        --green: #e9fff6;
+        --line: #eadff8;
+        --shadow: 0 18px 45px rgb(91 33 182 / 0.14);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at 12% 0%, #ffddec 0, transparent 28%),
+          radial-gradient(circle at 88% 4%, #dfe8ff 0, transparent 30%),
+          linear-gradient(180deg, var(--bg), #f9fbff);
+        color: var(--ink);
+      }
+
+      .page {
+        width: min(100%, 560px);
+        margin: 0 auto;
+        padding: 18px 14px 34px;
+      }
+
+      .hero,
+      .insight-card,
+      .steps-card,
+      .actions {
+        border: 1px solid rgb(255 255 255 / 0.84);
+        border-radius: 28px;
+        background: rgb(255 255 255 / 0.94);
+        box-shadow: var(--shadow);
+      }
+
+      .hero {
+        overflow: hidden;
+        padding: 22px;
+        background: linear-gradient(135deg, #ffffff 0%, var(--pink) 45%, #eee9ff 100%);
+      }
+
+      .topline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .badge,
+      .unlocked {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .badge {
+        background: var(--gold-soft);
+        color: #92400e;
+      }
+
+      .unlocked {
+        background: var(--green);
+        color: #047857;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.85rem, 8vw, 2.8rem);
+        line-height: 1;
+        letter-spacing: -0.04em;
+      }
+
+      .summary {
+        margin: 12px 0 0;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.6;
+      }
+
+      .score {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 14px;
+        align-items: center;
+        margin-top: 18px;
+        padding: 14px;
+        border-radius: 22px;
+        background: #fff;
+      }
+
+      .score__value {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 88px;
+        height: 88px;
+        border-radius: 28px;
+        background: linear-gradient(135deg, #8b5cf6, var(--primary));
+        color: #fff;
+        font-size: 30px;
+        font-weight: 950;
+      }
+
+      .score__label {
+        margin: 0 0 4px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 850;
+      }
+
+      .score__title {
+        margin: 0;
+        font-size: 18px;
+        line-height: 1.25;
+      }
+
+      .insights {
+        display: grid;
+        gap: 14px;
+        margin-top: 14px;
+      }
+
+      .insight-card,
+      .steps-card,
+      .actions {
+        padding: 18px;
+      }
+
+      .insight-card {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .insight-card::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary), #ec4899, var(--gold));
+      }
+
+      .label {
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 10px;
+        border-radius: 999px;
+        padding: 6px 10px;
+        background: #f4edff;
+        color: var(--primary-dark);
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      h2 {
+        margin: 0 0 9px;
+        font-size: 21px;
+        letter-spacing: -0.02em;
+      }
+
+      p {
+        margin: 0;
+      }
+
+      .text {
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.68;
+      }
+
+      .steps-card {
+        margin-top: 14px;
+        background: linear-gradient(135deg, #ffffff, #fbf7ff);
+      }
+
+      .steps {
+        display: grid;
+        gap: 10px;
+        margin: 14px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .steps li {
+        display: grid;
+        grid-template-columns: 30px 1fr;
+        gap: 10px;
+        align-items: start;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: #fff;
+        color: var(--ink);
+        line-height: 1.5;
+      }
+
+      .steps li::before {
+        content: counter(step);
+        counter-increment: step;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #8b5cf6, var(--primary));
+        color: #fff;
+        font-size: 13px;
+        font-weight: 900;
+      }
+
+      .steps {
+        counter-reset: step;
+      }
+
+      .actions {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 52px;
+        border: 0;
+        border-radius: 18px;
+        padding: 14px 16px;
+        font: inherit;
+        font-weight: 900;
+        text-decoration: none;
+      }
+
+      .button--primary {
+        background: linear-gradient(135deg, #8b5cf6, var(--primary));
+        color: #fff;
+        box-shadow: 0 12px 24px rgb(124 58 237 / 0.24);
+      }
+
+      .button--secondary {
+        border: 1px solid var(--line);
+        background: #fff;
+        color: var(--primary-dark);
+      }
+
+      .trust-note {
+        margin-top: 14px;
+        padding: 13px 14px;
+        border-radius: 18px;
+        background: rgb(255 255 255 / 0.72);
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      @media (min-width: 640px) {
+        .page {
+          padding-top: 34px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    {% set safe_score = score|default(0, true) %}
+    {% set safe_summary = short_summary|default("Bu natija javoblaringiz asosida munosabatdagi umumiy ohang, ehtimoliy zaif nuqta va amaliy keyingi qadamlarni ko‘rsatadi.", true) %}
+    {% set safe_reality = reality_check|default("Sizda munosabatga nisbatan iliqlik bor, lekin ichkarida ayrim savollar yoki ehtiyotkorlik ham kuzatilishi mumkin. Ehtimol, siz vaziyatni shunchaki his bilan emas, aniq belgilar orqali tushunishni xohlaysiz.", true) %}
+    {% set safe_problem = main_problem|default("Asosiy taranglik ko‘pincha kutishlar ochiq aytilmaganda paydo bo‘lishi mumkin. Bir tomon yaqinlik kutsa, boshqa tomon buni darhol sezmasligi yoki boshqacha ko‘rsatishi ehtimol.", true) %}
+    {% set safe_hidden = hidden_reason|default("Yashirin sabab sifatida tan olinmaslik yoki yetarlicha qadrlanmaslik hissi ko‘rinishi mumkin. Bu aniq xulosa emas, lekin ayrim javoblar munosabatda xavfsizlik va ishonch ehtiyoji muhimligini ko‘rsatadi.", true) %}
+    {% set safe_risk = future_risk|default("Agar shu holat davom etsa, mayda ranjishlar yig‘ilib, suhbatlar sovuqroq tus olishi mumkin. Vaqt o‘tishi bilan bu masofa hissini kuchaytirishi ehtimol, shuning uchun hozirdanoq yumshoq va aniq muloqot muhim.", true) %}
+    {% set fallback_steps = [
+      "Bir-biringizdan ayblamasdan: “Men hozir nimani his qilyapman?” deb so‘rashga harakat qiling.",
+      "Haftasiga kamida bir marta 20 daqiqalik telefonsiz suhbat uchun vaqt ajrating.",
+      "Kutayotgan narsangizni taxmin qildirmasdan, qisqa va aniq shaklda ayting.",
+      "Kelishmovchilik paytida darhol hukm chiqarishdan oldin tanaffus qiling.",
+      "Yaxshi bo‘lgan kichik harakatlarni ham ovoz chiqarib qadrlang."
+    ] %}
+    {% set steps = practical_steps|default(fallback_steps, true) %}
+
+    <main class="page">
+      <section class="hero" aria-labelledby="premium-title">
+        <div class="topline">
+          <span class="badge">Premium tahlil</span>
+          <span class="unlocked">Ochildi</span>
+        </div>
+        <h1 id="premium-title">{{ result_title|default("Sizning munosabat aniqligi tahlilingiz", true) }}</h1>
+        <p class="summary">{{ safe_summary }}</p>
+
+        <div class="score" aria-label="Moslik ko‘rsatkichi">
+          <div class="score__value">{{ safe_score }}%</div>
+          <div>
+            <p class="score__label">Moslik ko‘rsatkichi</p>
+            <p class="score__title">Javoblaringiz asosida shaxsiy premium natija</p>
+          </div>
+        </div>
+
+        <p class="trust-note">
+          Bu tahlil tashxis emas. U javoblaringizdagi naqshlarni ehtiyotkorlik bilan talqin qiladi
+          va munosabatni yaxshiroq tushunishga yordam beradigan yo‘nalish beradi.
+        </p>
+      </section>
+
+      <section class="insights" aria-label="Premium tahlil bo‘limlari">
+        <article class="insight-card">
+          <span class="label">1-bo‘lim</span>
+          <h2>Sizning hozirgi haqiqiy holatingiz</h2>
+          <p class="text">{{ safe_reality }}</p>
+        </article>
+
+        <article class="insight-card">
+          <span class="label">2-bo‘lim</span>
+          <h2>Asosiy muammo nimada?</h2>
+          <p class="text">{{ safe_problem }}</p>
+        </article>
+
+        <article class="insight-card">
+          <span class="label">3-bo‘lim</span>
+          <h2>Yashirin sabab</h2>
+          <p class="text">{{ safe_hidden }}</p>
+        </article>
+
+        <article class="insight-card">
+          <span class="label">4-bo‘lim</span>
+          <h2>Agar shu holat davom etsa...</h2>
+          <p class="text">{{ safe_risk }}</p>
+        </article>
+      </section>
+
+      <section class="steps-card" aria-labelledby="steps-title">
+        <span class="label">5-bo‘lim</span>
+        <h2 id="steps-title">Nima qilish kerak?</h2>
+        <p class="text">
+          Quyidagi qadamlar murakkab terapiya emas, kundalik hayotda sinab ko‘rish mumkin bo‘lgan
+          oddiy va ehtiyotkor harakatlardir.
+        </p>
+
+        <ol class="steps">
+          {% if steps is string %}
+            <li>{{ steps }}</li>
+          {% else %}
+            {% for step in steps %}
+              <li>{{ step }}</li>
+            {% else %}
+              {% for step in fallback_steps %}
+                <li>{{ step }}</li>
+              {% endfor %}
+            {% endfor %}
+          {% endif %}
+        </ol>
+      </section>
+
+      <section class="actions" aria-label="Natija amallari">
+        {% if share_url is defined and share_url %}
+          <a class="button button--primary" href="{{ share_url }}">Natijani ulashish</a>
+        {% endif %}
+        {% if retry_url is defined and retry_url %}
+          <a class="button button--secondary" href="{{ retry_url }}">Testni qayta topshirish</a>
+        {% else %}
+          <a class="button button--secondary" href="/">Testni qayta topshirish</a>
+        {% endif %}
+      </section>
+    </main>
+  </body>
+</html>

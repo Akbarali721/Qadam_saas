@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test natijasi</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <link rel="stylesheet" href="/static/love.css" />
+  </head>
+  <body data-page="result" data-token="{{ token }}" data-is-premium="{{ 'true' if is_premium else 'false' }}" data-payment-status="{{ payment_status|default('none', true) }}">
+    <main class="container result-page">
+      <header class="result-hero">
+        <p class="love-badge">💞 Sizlarning natijangiz</p>
+        <h1>Sizlarning moslik darajangiz</h1>
+        <p class="subtitle hero-subtitle">
+          Javoblaringiz asosida qisqa va samimiy tahlil tayyorlandi
+        </p>
+        <div class="score-hero" aria-live="polite">
+          <p class="score-hero-label">Sizlarning moslik darajangiz</p>
+          <p id="score" class="score-hero-value"></p>
+          <p id="emotional-line" class="emotional-line"></p>
+        </div>
+      </header>
+
+      <section id="result-card" class="card result-body hidden">
+        {% if not is_premium %}
+        <section class="reason-block" aria-labelledby="reason-heading">
+          <h2 id="reason-heading" class="section-title">Qisqa xulosa</h2>
+          <p class="section-lead">
+            Ba’zi savollarda qarashlaringiz juda yaqin, ayrim joylarda esa bir-biringizni
+            yaxshiroq tushunish uchun kichik suhbat kerak bo‘lishi mumkin.
+          </p>
+        </section>
+
+        <h2 class="section-title">Yo‘nalishlar</h2>
+        <p class="section-lead">
+          Muloqot, ishonch, e’tibor va hissiy yaqinlik bo‘yicha umumiy ko‘rinish.
+        </p>
+        <div id="dimension-teasers" class="teaser-grid"></div>
+
+        <section id="differences-block" class="diff-panel hidden" aria-labelledby="diff-heading">
+          <h2 id="diff-heading" class="diff-heading">Muhim tafovutlar</h2>
+          <p id="differences-text" class="diff-text"></p>
+        </section>
+
+        <section class="premium-panel" aria-labelledby="premium-heading">
+          <h2 id="premium-heading" class="premium-heading">🔒 Batafsil tahlil</h2>
+          <p class="premium-modal__price">Narxi: 25 000 so‘m</p>
+          <p class="premium-sub">
+            To‘lov admin orqali qabul qilinadi. Admin bilan bog‘laning va test tokeningizni yuboring.
+            Tasdiqlangandan so‘ng sizga PDF tahlil yuboriladi.
+          </p>
+          <a class="btn-premium" href="https://t.me/YOUR_USERNAME?text=Salom%2C%20men%20to%E2%80%98liq%20tahlilni%20olmoqchiman.%20Test%20tokenim%3A%20{{ token }}" target="_blank" rel="noopener noreferrer">
+            Admin bilan bog‘lanish
+          </a>
+        </section>
+        {% endif %}
+
+        {% if is_premium %}
+        <section id="full-analysis" class="card" data-static-premium="true" aria-labelledby="full-analysis-heading">
+          <h2 id="full-analysis-heading" class="section-title">To‘liq tahlil</h2>
+          {% if premium %}
+          <p class="section-lead">{{ premium.summary }}</p>
+          {% endif %}
+
+          <h3 class="teaser-title">Asosiy muammo nuqtasi</h3>
+          <p id="analysis-problem" class="section-lead">
+            {{ premium.main_risk if premium else "Vaqti-vaqti bilan muloqot ritmi mos kelmasligi sababli bir-biringizni noto‘g‘ri talqin qilish holati kuzatiladi." }}
+          </p>
+
+          <h3 class="teaser-title">Qaysi vaziyatlarda muammo chiqadi</h3>
+          <p id="analysis-situations" class="section-lead">
+            Ayniqsa charchoq paytida, kutilmalar oldindan aniq aytilmaganida va tezkor qaror talab qilingan vaziyatlarda.
+          </p>
+
+          <h3 class="teaser-title">Kuchli tomonlar</h3>
+          <ul id="analysis-strengths" class="premium-list">
+            {% if premium %}
+            {% for item in premium.strong_sides %}
+            <li>{{ item }}</li>
+            {% endfor %}
+            {% else %}
+            <li>Hissiy yaqinlik va bir-biringizni qo‘llab-quvvatlash salohiyati yuqori.</li>
+            {% endif %}
+          </ul>
+
+          <h3 class="teaser-title">O‘sish kerak bo‘lgan joylar</h3>
+          <ul class="premium-list">
+            {% if premium %}
+            {% for item in premium.weak_sides %}
+            <li>{{ item }}</li>
+            {% endfor %}
+            {% else %}
+            <li>Kutilmalarni oldindan aniq aytib olish munosabatni yengillashtiradi.</li>
+            {% endif %}
+          </ul>
+
+          <h3 class="teaser-title">Aniq tavsiyalar</h3>
+          <ul id="analysis-tips" class="premium-list">
+            {% if premium %}
+            {% for item in premium.recommendations %}
+            <li>{{ item }}</li>
+            {% endfor %}
+            {% else %}
+            <li>Haftada kamida 1 marta 20 daqiqalik ochiq suhbat odatini kiriting.</li>
+            <li>Kelishmovchilik vaqtida ayblash o‘rniga his-tuyg‘uni tinch ifoda qiling.</li>
+            <li>Kutilmalarni oldindan aniq aytib olishga odatlaning.</li>
+            {% endif %}
+          </ul>
+
+          <h3 class="teaser-title">7 kunlik munosabat rejasi</h3>
+          <ul class="premium-list">
+            {% if premium %}
+            {% for item in premium.seven_day_plan %}
+            <li>{{ item }}</li>
+            {% endfor %}
+            {% else %}
+            <li>Har kuni kichik samimiy suhbat va e’tibor odatini bajaring.</li>
+            {% endif %}
+          </ul>
+
+          <h3 class="teaser-title">Yakuniy xulosa</h3>
+          <p id="analysis-insight" class="section-lead">
+            {{ premium.conclusion if premium else "Sizlarda yaqinlik bor, lekin stress davrida himoya reaksiyasi kuchayadi; shu nuqtada muloqot uslubini yumshatish eng katta foyda beradi." }}
+          </p>
+        </section>
+        {% endif %}
+
+        <section id="zodiac-block" class="zodiac-aside hidden" aria-labelledby="zodiac-heading">
+          <h2 id="zodiac-heading" class="zodiac-heading">Burjlar mosligi</h2>
+          <p class="zodiac-row">
+            <span class="zodiac-label">Boshlovchi:</span>
+            <span id="initiator-zodiac" class="zodiac-value"></span>
+          </p>
+          <p class="zodiac-row">
+            <span class="zodiac-label">Hamkor:</span>
+            <span id="partner-zodiac" class="zodiac-value"></span>
+          </p>
+          <p id="zodiac-summary" class="zodiac-note"></p>
+        </section>
+      </section>
+
+      <p id="message" class="message"></p>
+
+      <section class="card result-share-teaser" aria-labelledby="share-teaser-heading">
+        <h2 id="share-teaser-heading" class="section-title">Natijani ulashish</h2>
+        <p class="section-lead">
+          Moslik natijangizni saqlab qo‘ying yoki yaqinlaringiz bilan ulashing.
+        </p>
+        <button type="button" class="love-btn love-btn--primary" id="result-share-btn">Natijani ulashish</button>
+      </section>
+
+      {% if not is_premium %}
+      <section class="card result-share-teaser" aria-labelledby="telegram-cta-heading">
+        <h2 id="telegram-cta-heading" class="section-title">Batafsil tahlil uchun</h2>
+        <p class="section-lead">
+          Shaxsiy tahlil, chuqur izoh va aniq tavsiyalarni olish uchun to‘liq natijani oching.
+        </p>
+      </section>
+      {% endif %}
+
+      <div class="actions">
+        {% if is_premium %}
+        <a href="/pdf/love/{{ token }}" class="love-btn love-btn--primary">PDF yuklab olish</a>
+        {% endif %}
+        <a href="/" class="love-btn love-btn--secondary">Yangi test boshlash</a>
+      </div>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

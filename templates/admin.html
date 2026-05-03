@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+    <style>
+      :root {
+        --bg: #f6f7fb;
+        --card: #ffffff;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --primary: #2563eb;
+        --danger: #dc2626;
+        --success: #059669;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+      .header {
+        margin-bottom: 16px;
+      }
+      .header h1 {
+        margin: 0 0 8px;
+        font-size: 24px;
+      }
+      .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px;
+      }
+      .summary-label {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .summary-value {
+        margin-top: 6px;
+        font-size: 28px;
+        font-weight: 700;
+      }
+      .section-title {
+        margin: 0 0 10px;
+      }
+      .grid-form {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .grid-form .full {
+        grid-column: 1 / -1;
+      }
+      label {
+        display: block;
+        font-size: 13px;
+        margin-bottom: 4px;
+        color: var(--muted);
+      }
+      input, select, textarea, button {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 14px;
+      }
+      textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .btn {
+        cursor: pointer;
+        border: none;
+      }
+      .btn-primary { background: var(--primary); color: #fff; }
+      .btn-secondary { background: #111827; color: #fff; }
+      .btn-danger { background: var(--danger); color: #fff; }
+      .btn-ghost { background: #eef2ff; color: #1d4ed8; }
+      .question-card {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px;
+        margin-bottom: 10px;
+      }
+      .question-meta {
+        color: var(--muted);
+        font-size: 13px;
+        margin: 6px 0;
+      }
+      .option-list {
+        margin: 8px 0;
+        padding-left: 18px;
+      }
+      .message {
+        margin-top: 10px;
+        font-size: 14px;
+      }
+      .message.success { color: var(--success); }
+      .message.error { color: var(--danger); }
+      @media (max-width: 700px) {
+        .grid-form {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <header class="header">
+        <h1>Admin Dashboard</h1>
+      </header>
+
+      <section class="summary-grid" aria-label="Dashboard summary">
+        <div class="card">
+          <div class="summary-label">Total Questions</div>
+          <div class="summary-value">{{ total_questions }}</div>
+        </div>
+        <div class="card">
+          <div class="summary-label">Total Sessions</div>
+          <div class="summary-value">{{ total_sessions }}</div>
+        </div>
+        <div class="card">
+          <div class="summary-label">Completed Sessions</div>
+          <div class="summary-value">{{ completed_sessions }}</div>
+        </div>
+        <div class="card">
+          <div class="summary-label">Today Sessions</div>
+          <div class="summary-value">{{ today_sessions }}</div>
+        </div>
+        <div class="card">
+          <div class="summary-label">Result Views</div>
+          <div class="summary-value">{{ result_views }}</div>
+        </div>
+        <div class="card">
+          <div class="summary-label">Premium Interest Clicks</div>
+          <div class="summary-value">{{ premium_interest_clicks }}</div>
+        </div>
+        <div class="card">
+          <div class="summary-label">Premium Interest Rate</div>
+          <div class="summary-value">{{ premium_interest_rate }}</div>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Question management form">
+        <h2 class="section-title">Create / Edit Question</h2>
+        <form id="question-form" class="grid-form">
+          <input id="question-id" type="hidden" />
+
+          <div class="full">
+            <label for="text">Text</label>
+            <textarea id="text" required></textarea>
+          </div>
+
+          <div>
+            <label for="order">Order</label>
+            <input id="order" type="number" min="1" required />
+          </div>
+
+          <div>
+            <label for="dimension">Dimension</label>
+            <input id="dimension" type="text" required />
+          </div>
+
+          <div>
+            <label for="relationship_type">Relationship Type</label>
+            <select id="relationship_type">
+              <option value="married">married</option>
+              <option value="friends">friends</option>
+              <option value="dating">dating</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="gender_target">Gender Target</label>
+            <select id="gender_target">
+              <option value="both">both</option>
+              <option value="female">female</option>
+              <option value="male">male</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="option-1">Option 1 (weight=1)</label>
+            <input id="option-1" type="text" required />
+          </div>
+          <div>
+            <label for="option-2">Option 2 (weight=2)</label>
+            <input id="option-2" type="text" required />
+          </div>
+          <div>
+            <label for="option-3">Option 3 (weight=3)</label>
+            <input id="option-3" type="text" required />
+          </div>
+          <div>
+            <label for="option-4">Option 4 (weight=4)</label>
+            <input id="option-4" type="text" required />
+          </div>
+
+          <div class="full actions">
+            <button class="btn btn-primary" type="submit">Save Question</button>
+            <button class="btn btn-secondary" type="button" id="reset-form-btn">Reset</button>
+          </div>
+        </form>
+        <div id="form-message" class="message" role="status"></div>
+      </section>
+
+      <section class="card" style="margin-top: 16px" aria-label="Question list">
+        <h2 class="section-title">Questions</h2>
+        <div id="questions-list"></div>
+      </section>
+    </main>
+
+    <script>
+      const API_BASE = "/api/admin/questions";
+      const adminToken = new URLSearchParams(window.location.search).get("token") || "";
+      const form = document.getElementById("question-form");
+      const messageEl = document.getElementById("form-message");
+      const listEl = document.getElementById("questions-list");
+
+      function adminHeaders(extraHeaders) {
+        return {
+          "X-Admin-Token": adminToken,
+          ...(extraHeaders || {}),
+        };
+      }
+
+      function showMessage(text, type) {
+        messageEl.textContent = text;
+        messageEl.className = "message " + (type || "");
+      }
+
+      function getPayloadFromForm() {
+        return {
+          text: document.getElementById("text").value.trim(),
+          order: Number(document.getElementById("order").value),
+          dimension: document.getElementById("dimension").value.trim(),
+          relationship_type: document.getElementById("relationship_type").value,
+          gender_target: document.getElementById("gender_target").value,
+          options: [
+            { text: document.getElementById("option-1").value.trim(), value: 1 },
+            { text: document.getElementById("option-2").value.trim(), value: 2 },
+            { text: document.getElementById("option-3").value.trim(), value: 3 },
+            { text: document.getElementById("option-4").value.trim(), value: 4 },
+          ],
+        };
+      }
+
+      function validatePayload(payload) {
+        if (!payload.text || !payload.dimension || !payload.order) return false;
+        return payload.options.every((opt) => opt.text.length > 0);
+      }
+
+      function resetForm() {
+        form.reset();
+        document.getElementById("question-id").value = "";
+      }
+
+      function fillForm(question) {
+        document.getElementById("question-id").value = String(question.id);
+        document.getElementById("text").value = question.text || "";
+        document.getElementById("order").value = question.order || "";
+        document.getElementById("dimension").value = question.dimension || "";
+        document.getElementById("relationship_type").value = question.relationship_type || "married";
+        document.getElementById("gender_target").value = question.gender_target || "both";
+
+        const sortedOptions = [...(question.options || [])].sort((a, b) => a.weight - b.weight);
+        document.getElementById("option-1").value = sortedOptions[0]?.text || "";
+        document.getElementById("option-2").value = sortedOptions[1]?.text || "";
+        document.getElementById("option-3").value = sortedOptions[2]?.text || "";
+        document.getElementById("option-4").value = sortedOptions[3]?.text || "";
+      }
+
+      async function fetchQuestions() {
+        const res = await fetch(API_BASE, {
+          headers: adminHeaders(),
+        });
+        if (!res.ok) throw new Error("Failed to fetch questions");
+        return res.json();
+      }
+
+      function renderQuestions(questions) {
+        if (!questions.length) {
+          listEl.innerHTML = "<p>No questions yet.</p>";
+          return;
+        }
+
+        listEl.innerHTML = questions
+          .map((q) => {
+            const optionsHtml = (q.options || [])
+              .sort((a, b) => a.weight - b.weight)
+              .map((opt) => `<li>${opt.text} <strong>(w:${opt.weight})</strong></li>`)
+              .join("");
+
+            return `
+              <article class="question-card">
+                <h3>#${q.id}: ${q.text}</h3>
+                <div class="question-meta">
+                  dimension: <strong>${q.dimension}</strong> |
+                  relationship_type: <strong>${q.relationship_type}</strong> |
+                  gender_target: <strong>${q.gender_target}</strong> |
+                  order: <strong>${q.order}</strong>
+                </div>
+                <ul class="option-list">${optionsHtml}</ul>
+                <div class="actions">
+                  <button class="btn btn-ghost" type="button" data-action="edit" data-id="${q.id}">Edit</button>
+                  <button class="btn btn-danger" type="button" data-action="delete" data-id="${q.id}">Delete</button>
+                </div>
+              </article>
+            `;
+          })
+          .join("");
+      }
+
+      async function loadQuestions() {
+        try {
+          const questions = await fetchQuestions();
+          renderQuestions(questions);
+          listEl.dataset.questions = JSON.stringify(questions);
+        } catch (err) {
+          listEl.innerHTML = "<p>Failed to load questions.</p>";
+        }
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        showMessage("", "");
+
+        const questionId = document.getElementById("question-id").value;
+        const payload = getPayloadFromForm();
+        if (!validatePayload(payload)) {
+          showMessage("Please fill all required fields.", "error");
+          return;
+        }
+
+        const method = questionId ? "PUT" : "POST";
+        const url = questionId ? `${API_BASE}/${questionId}` : API_BASE;
+
+        try {
+          const res = await fetch(url, {
+            method,
+            headers: adminHeaders({ "Content-Type": "application/json" }),
+            body: JSON.stringify(payload),
+          });
+
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.detail || "Request failed");
+          }
+
+          showMessage(questionId ? "Question updated." : "Question created.", "success");
+          resetForm();
+          await loadQuestions();
+        } catch (err) {
+          showMessage(err.message || "Failed to save question.", "error");
+        }
+      });
+
+      document.getElementById("reset-form-btn").addEventListener("click", () => {
+        resetForm();
+        showMessage("", "");
+      });
+
+      listEl.addEventListener("click", async (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+
+        const action = target.dataset.action;
+        const id = target.dataset.id;
+        if (!action || !id) return;
+
+        const questions = JSON.parse(listEl.dataset.questions || "[]");
+        const question = questions.find((q) => String(q.id) === id);
+        if (!question) return;
+
+        if (action === "edit") {
+          fillForm(question);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          return;
+        }
+
+        if (action === "delete") {
+          const confirmed = window.confirm("Delete this question?");
+          if (!confirmed) return;
+
+          try {
+            const res = await fetch(`${API_BASE}/${id}`, {
+              method: "DELETE",
+              headers: adminHeaders(),
+            });
+            if (!res.ok) throw new Error("Delete failed");
+            showMessage("Question deleted.", "success");
+            await loadQuestions();
+          } catch (err) {
+            showMessage(err.message || "Failed to delete question.", "error");
+          }
+        }
+      });
+
+      loadQuestions();
+    </script>
+  </body>
+</html>

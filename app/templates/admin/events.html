@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Qadam Events</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #f6f7fb; color: #111827; }
+      main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+      a { color: #4338ca; font-weight: 700; text-decoration: none; }
+      .nav { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+      .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px; }
+      table { width: 100%; border-collapse: collapse; background: #fff; }
+      th, td { border-bottom: 1px solid #e5e7eb; padding: 12px; text-align: left; vertical-align: top; }
+      th { color: #6b7280; font-size: 12px; text-transform: uppercase; }
+      code { background: #f3f4f6; border-radius: 6px; padding: 2px 5px; white-space: pre-wrap; }
+      .muted { color: #6b7280; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <nav class="nav">
+        <a href="/admin?token={{ request.query_params.get('token', '') }}">Dashboard</a>
+        <a href="/admin/products?token={{ request.query_params.get('token', '') }}">Products</a>
+        <a href="/admin/sessions?token={{ request.query_params.get('token', '') }}">Sessions</a>
+      </nav>
+      <h1>Events</h1>
+      <p class="muted">Latest product events across the Qadam platform.</p>
+      <section class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Product</th>
+              <th>Session</th>
+              <th>Type</th>
+              <th>Metadata</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for event in events %}
+            <tr>
+              <td>{{ event.id }}</td>
+              <td>{{ event.product_slug }}</td>
+              <td>{{ event.session_token or "-" }}</td>
+              <td>{{ event.event_type }}</td>
+              <td><code>{{ event.metadata_json }}</code></td>
+              <td>{{ event.created_at }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="6" class="muted">No events yet.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

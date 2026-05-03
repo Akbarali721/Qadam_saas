@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Savollar — Munosabat testi</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <link rel="stylesheet" href="/static/love.css" />
+  </head>
+  <body
+    data-page="questions"
+    data-token="{{ token or '' }}"
+    data-role="{{ role or '' }}"
+    class="app-body app-body--quiz love-body"
+  >
+    <main class="quiz-shell">
+      <div class="quiz-card">
+        <nav class="love-topbar" aria-label="Savollar menyusi">
+          <button id="quiz-back-btn" class="love-icon-btn" type="button" aria-label="Oldingi savol">←</button>
+          <span id="quiz-progress-pill" class="love-progress-pill">
+            {% if questions %}1/{{ questions|length }}{% else %}0/0{% endif %}
+          </span>
+          <span class="love-icon-btn" aria-label="Yordam">?</span>
+        </nav>
+
+        <header class="quiz-header">
+          <h1 class="quiz-title">Samimiy javob bering 💬</h1>
+          <p id="quiz-role-hint" class="quiz-subtitle"></p>
+        </header>
+
+        <div id="quiz-progress" class="quiz-progress hidden" aria-hidden="true">
+          <div class="quiz-progress__meta">
+            <span id="quiz-progress-label" class="quiz-progress__label"></span>
+            <span id="quiz-progress-count" class="quiz-progress__count"></span>
+          </div>
+          <div
+            class="quiz-progress__track"
+            role="progressbar"
+            aria-valuemin="1"
+            aria-valuemax="10"
+            aria-valuenow="1"
+            id="quiz-progress-bar"
+          >
+            <div id="quiz-progress-fill" class="quiz-progress__fill"></div>
+          </div>
+        </div>
+
+        <form id="questions-form" class="quiz-form" novalidate>
+          <input id="session-token" type="hidden" value="{{ token or '' }}" />
+          <input id="quiz-role" type="hidden" value="{{ role or '' }}" />
+          <div id="questions-mount" class="questions-mount"></div>
+        </form>
+
+        <div id="answer-saved-bubble" class="love-saved-bubble">Javobingiz saqlandi</div>
+
+        <div class="quiz-footer-actions">
+          <button id="submit-answers-btn" class="btn btn-primary btn-block" type="submit" form="questions-form">
+            Javoblarni yuborish
+          </button>
+        </div>
+        <p id="message" class="form-message" role="alert"></p>
+      </div>
+    </main>
+
+    <script id="bootstrap-questions" type="application/json">{{ questions_json | default("[]") | safe }}</script>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

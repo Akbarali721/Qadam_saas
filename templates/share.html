@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Havolangiz tayyor — Munosabat testi</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <link rel="stylesheet" href="/static/love.css" />
+  </head>
+  <body data-page="share" class="app-body app-body--onboarding love-body">
+    <main class="love-shell">
+      <div class="love-card share-step">
+        <div class="share-step__icon" aria-hidden="true">💌</div>
+        <h1 class="love-title">Sevgan insoningizni taklif qiling</h1>
+        <p class="love-subtitle">
+          Natijani ko‘rish uchun havolani unga yuboring. U ham savollarga javob bergach,
+          umumiy moslik chiqadi.
+        </p>
+        <label class="field">
+          <span class="field-label">Taklif havolasi</span>
+          <input
+            id="partner-link"
+            class="love-link-input"
+            type="text"
+            readonly
+            value="{{ partner_start_url }}"
+          />
+        </label>
+        <div class="love-actions">
+          <button id="share-partner-link" class="love-btn love-btn--primary" type="button">
+            📤 Sevgilimga yuborish
+          </button>
+          <button id="copy-partner-link" class="love-btn love-btn--secondary" type="button">
+            🔗 Havolani nusxalash
+          </button>
+          <a class="love-btn love-btn--ghost" href="/result/{{ token }}">
+            Natijani ko‘rish
+          </a>
+        </div>
+
+        <div class="share-buttons" aria-label="Ulashish">
+          <a id="telegram-share" class="share-chip" href="#" target="_blank" rel="noopener">Telegram</a>
+          <a id="whatsapp-share" class="share-chip" href="#" target="_blank" rel="noopener">WhatsApp</a>
+          <button class="share-chip" type="button" id="instagram-share">Instagram</button>
+          <button class="share-chip" type="button" id="more-share">More</button>
+        </div>
+        <p id="message" class="form-message" role="alert"></p>
+      </div>
+    </main>
+    <script>
+      const inviteLink = document.getElementById("partner-link")?.value || "";
+      const shareText = "Keling, mosligimizni tekshirib ko‘ramiz 💜";
+      const msg = document.getElementById("message");
+
+      async function copyInviteLink() {
+        const el = document.getElementById("partner-link");
+        if (!el) return;
+        try {
+          await navigator.clipboard.writeText(el.value);
+          if (msg) msg.textContent = "Havola nusxalandi.";
+        } catch {
+          if (msg) msg.textContent = "Nusxalab bo‘lmadi.";
+        }
+      }
+
+      async function shareInviteLink() {
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: "Sevgi testi",
+              text: shareText,
+              url: inviteLink,
+            });
+            return;
+          } catch {
+            // User may cancel native share; fallback below keeps the CTA useful.
+          }
+        }
+        await copyInviteLink();
+      }
+
+      document.getElementById("share-partner-link")?.addEventListener("click", shareInviteLink);
+      document.getElementById("copy-partner-link")?.addEventListener("click", copyInviteLink);
+      document.getElementById("more-share")?.addEventListener("click", shareInviteLink);
+      document.getElementById("instagram-share")?.addEventListener("click", async () => {
+        await copyInviteLink();
+        if (msg) msg.textContent = "Havola nusxalandi. Instagram chatiga joylashing.";
+      });
+
+      const encodedUrl = encodeURIComponent(inviteLink);
+      const encodedText = encodeURIComponent(shareText);
+      const telegram = document.getElementById("telegram-share");
+      const whatsapp = document.getElementById("whatsapp-share");
+      if (telegram) telegram.href = `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`;
+      if (whatsapp) whatsapp.href = `https://wa.me/?text=${encodedText}%20${encodedUrl}`;
+    </script>
+  </body>
+</html>

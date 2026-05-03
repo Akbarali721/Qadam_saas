@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Testga taklif — Munosabat testi</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <link rel="stylesheet" href="/static/love.css" />
+  </head>
+  <body data-page="partner" class="app-body app-body--onboarding love-body">
+    <main class="love-shell">
+      <div class="love-card">
+        <header class="love-hero">
+          <p class="love-badge">💌 Taklif keldi</p>
+          <h1 class="love-title">Sevgi testi</h1>
+        </header>
+
+        <div class="chat-invite" id="invite-text">
+          <span class="chat-avatar" aria-hidden="true">💜</span>
+          <div class="chat-bubble">
+            <p>
+              Sizni sevgan insoningiz <strong>{{ initiator_name }}</strong> testga taklif qildi.
+              Keling, mosligingizni birga tekshirib ko‘ring.
+            </p>
+          </div>
+        </div>
+
+        <form id="partner-form" class="anketa-form love-form-panel" novalidate>
+          <h2 class="love-form-title">Siz haqingizda</h2>
+          <input type="hidden" id="session-token" value="{{ token }}" />
+          <div class="field">
+            <label class="field-label" for="partner-name">Ism</label>
+            <input id="partner-name" class="field-input" type="text" placeholder="Masalan, Aziz" required minlength="1" maxlength="120" />
+          </div>
+          <div class="field">
+            <label class="field-label" for="partner-age">Yosh</label>
+            <input id="partner-age" class="field-input" type="number" min="18" max="99" placeholder="Masalan, 25" required />
+          </div>
+          <fieldset class="field field--fieldset">
+            <legend class="field-label">Jins</legend>
+            <div class="choice-row choice-row--2" role="radiogroup">
+              <label class="choice-tile">
+                <input type="radio" name="partner_gender" value="erkak" required />
+                <span class="choice-tile__body">
+                  <span class="choice-tile__emoji" aria-hidden="true">♂</span>
+                  <span class="choice-tile__title">Erkak</span>
+                </span>
+              </label>
+              <label class="choice-tile">
+                <input type="radio" name="partner_gender" value="ayol" />
+                <span class="choice-tile__body">
+                  <span class="choice-tile__emoji" aria-hidden="true">♀</span>
+                  <span class="choice-tile__title">Ayol</span>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+          <fieldset class="field field--fieldset">
+            <legend class="field-label">Burj</legend>
+            <div class="zodiac-grid" role="radiogroup">
+              <label class="zodiac-chip"><input type="radio" name="partner_zodiac" value="Qo‘y" required /><span>Qo‘y</span></label>
+              <label class="zodiac-chip"><input type="radio" name="partner_zodiac" value="Buzoq" /><span>Buzoq</span></label>
+              <label class="zodiac-chip"><input type="radio" name="partner_zodiac" value="Egizaklar" /><span>Egizaklar</span></label>
+              <label class="zodiac-chip"><input type="radio" name="partner_zodiac" value="Qisqichbaqa" /><span>Qisqichbaqa</span></label>
+              <label class="zodiac-chip"><input type="radio" name="partner_zodiac" value="Arslon" /><span>Arslon</span></label>
+              <label class="zodiac-chip"><input type="radio" name="partner_zodiac" value="Sunbula" /><span>Sunbula</span></label>
+              <label class="zodiac-chip"><input type="radio" name="partner_zodiac" value="Tarozi" /><span>Tarozi</span></label>
+              <label class="zodiac-chip"><input type="radio" name="partner_zodiac" value="Chayon" /><span>Chayon</span></label>
+              <label class="zodiac-chip"><input type="radio" name="partner_zodiac" value="O‘qotar" /><span>O‘qotar</span></label>
+              <label class="zodiac-chip"><input type="radio" name="partner_zodiac" value="Tog‘ echkisi" /><span>Tog‘ echkisi</span></label>
+              <label class="zodiac-chip"><input type="radio" name="partner_zodiac" value="Qovg‘a" /><span>Qovg‘a</span></label>
+              <label class="zodiac-chip"><input type="radio" name="partner_zodiac" value="Baliq" /><span>Baliq</span></label>
+            </div>
+          </fieldset>
+          <div class="anketa-actions">
+            <button id="partner-submit" class="btn btn-primary btn-block" type="submit">Testni boshlash</button>
+          </div>
+        </form>
+        <p id="message" class="form-message" role="alert"></p>
+      </div>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

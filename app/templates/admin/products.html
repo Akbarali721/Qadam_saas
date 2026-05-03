@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Qadam Products</title>
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; background: #f6f7fb; color: #111827; }
+      main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+      a { color: #4338ca; font-weight: 700; text-decoration: none; }
+      .nav { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+      .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px; }
+      table { width: 100%; border-collapse: collapse; background: #fff; }
+      th, td { border-bottom: 1px solid #e5e7eb; padding: 12px; text-align: left; vertical-align: top; }
+      th { color: #6b7280; font-size: 12px; text-transform: uppercase; }
+      .muted { color: #6b7280; }
+      .badge { border-radius: 999px; padding: 4px 10px; background: #eef2ff; color: #4338ca; font-size: 12px; font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <nav class="nav">
+        <a href="/admin?token={{ request.query_params.get('token', '') }}">Dashboard</a>
+        <a href="/admin/sessions?token={{ request.query_params.get('token', '') }}">Sessions</a>
+        <a href="/admin/events?token={{ request.query_params.get('token', '') }}">Events</a>
+      </nav>
+      <h1>Products</h1>
+      <p class="muted">Core product registry for Qadam modules.</p>
+      <section class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Status</th>
+              <th>Sessions</th>
+              <th>Today</th>
+              <th>Finished</th>
+              <th>Paths</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for product in products %}
+            {% set stats = product_stats[product.slug] %}
+            <tr>
+              <td>
+                <strong>{{ product.title or product.name }}</strong><br />
+                <span class="muted">{{ product.slug }} - {{ product.description }}</span>
+              </td>
+              <td><span class="badge">{{ product.status }}</span></td>
+              <td>{{ stats.total_sessions }}</td>
+              <td>{{ stats.today_sessions }}</td>
+              <td>{{ stats.finished_sessions }}</td>
+              <td>
+                <span class="muted">Public:</span> {{ product.public_path }}<br />
+                <span class="muted">Admin:</span> {{ product.admin_path }}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </body>
+</html>

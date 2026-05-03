@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sevgi testi</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <link rel="stylesheet" href="/static/love.css" />
+  </head>
+  <body data-page="index" class="app-body app-body--onboarding love-body">
+    <main class="love-shell">
+      <div class="love-card">
+        <header class="love-hero">
+          <p class="love-badge">💜 2 kishilik moslik testi</p>
+          <h1 class="love-title">Sevgi testi</h1>
+          <p class="love-subtitle">
+            2 kishi javob beradi, tizim esa sizlarning moslik darajangizni hisoblaydi.
+          </p>
+        </header>
+
+        <section class="love-benefits" aria-label="Afzalliklar">
+          <div class="love-benefit"><span>⏱</span> 2 daqiqada</div>
+          <div class="love-benefit"><span>💬</span> Ilmiy asoslangan savollar</div>
+          <div class="love-benefit"><span>💞</span> Natijani sherigingiz bilan ko‘ring</div>
+        </section>
+
+        <div class="love-actions" aria-label="Boshlash">
+          <a class="love-btn love-btn--primary" href="#profile-form">Testni boshlash</a>
+          <a class="love-btn love-btn--secondary" href="#how-it-works">Qanday ishlaydi?</a>
+        </div>
+
+        <section class="love-how" aria-label="Boshqa testlar">
+          <div class="love-how-item">
+            <span class="love-how-num">MBTI</span>
+            <span><a href="/mbti/start">Shaxsiyat testini boshlash</a></span>
+          </div>
+          <div class="love-how-item">
+            <span class="love-how-num">Stress</span>
+            <span><a href="/stress/start">Stress testini boshlash</a></span>
+          </div>
+        </section>
+
+        <section id="how-it-works" class="love-how" aria-label="Qanday ishlaydi">
+          <div class="love-how-item">
+            <span class="love-how-num">1</span>
+            <span>Avval o‘zingiz haqingizda qisqa ma’lumot kiritasiz.</span>
+          </div>
+          <div class="love-how-item">
+            <span class="love-how-num">2</span>
+            <span>Savollarga samimiy javob berasiz va taklif havolasini yuborasiz.</span>
+          </div>
+          <div class="love-how-item">
+            <span class="love-how-num">3</span>
+            <span>Sherigingiz ham javob bergach, umumiy moslik chiqadi.</span>
+          </div>
+        </section>
+
+        <form id="initiator-form" class="anketa-form love-form-panel" novalidate>
+          <h2 id="profile-form" class="love-form-title">Profilingizni to‘ldiring</h2>
+          <div id="step-form" class="anketa-step">
+            <div class="field">
+              <label class="field-label" for="initiator-name">Ismingiz</label>
+              <input
+                id="initiator-name"
+                class="field-input"
+                type="text"
+                name="initiator_name"
+                autocomplete="name"
+                placeholder="Masalan, Dilshoda"
+                required
+                minlength="1"
+                maxlength="120"
+              />
+            </div>
+
+            <div class="field">
+              <label class="field-label" for="initiator-age">Yosh</label>
+              <input
+                id="initiator-age"
+                class="field-input"
+                type="number"
+                name="initiator_age"
+                inputmode="numeric"
+                min="18"
+                max="99"
+                placeholder="Masalan, 24"
+                required
+              />
+            </div>
+
+            <fieldset class="field field--fieldset">
+              <legend class="field-label">Jins</legend>
+              <div class="choice-row choice-row--2" role="radiogroup" aria-label="Jins">
+                <label class="choice-tile">
+                  <input type="radio" name="initiator_gender" value="erkak" required />
+                  <span class="choice-tile__body">
+                    <span class="choice-tile__emoji" aria-hidden="true">♂</span>
+                    <span class="choice-tile__title">Erkak</span>
+                  </span>
+                </label>
+                <label class="choice-tile">
+                  <input type="radio" name="initiator_gender" value="ayol" />
+                  <span class="choice-tile__body">
+                    <span class="choice-tile__emoji" aria-hidden="true">♀</span>
+                    <span class="choice-tile__title">Ayol</span>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="field field--fieldset">
+              <legend class="field-label">Burj</legend>
+              <div class="zodiac-grid" role="radiogroup" aria-label="Burj">
+                <label class="zodiac-chip"><input type="radio" name="initiator_zodiac" value="Qo‘y" required /><span>Qo‘y</span></label>
+                <label class="zodiac-chip"><input type="radio" name="initiator_zodiac" value="Buzoq" /><span>Buzoq</span></label>
+                <label class="zodiac-chip"><input type="radio" name="initiator_zodiac" value="Egizaklar" /><span>Egizaklar</span></label>
+                <label class="zodiac-chip"><input type="radio" name="initiator_zodiac" value="Qisqichbaqa" /><span>Qisqichbaqa</span></label>
+                <label class="zodiac-chip"><input type="radio" name="initiator_zodiac" value="Arslon" /><span>Arslon</span></label>
+                <label class="zodiac-chip"><input type="radio" name="initiator_zodiac" value="Sunbula" /><span>Sunbula</span></label>
+                <label class="zodiac-chip"><input type="radio" name="initiator_zodiac" value="Tarozi" /><span>Tarozi</span></label>
+                <label class="zodiac-chip"><input type="radio" name="initiator_zodiac" value="Chayon" /><span>Chayon</span></label>
+                <label class="zodiac-chip"><input type="radio" name="initiator_zodiac" value="O‘qotar" /><span>O‘qotar</span></label>
+                <label class="zodiac-chip"><input type="radio" name="initiator_zodiac" value="Tog‘ echkisi" /><span>Tog‘ echkisi</span></label>
+                <label class="zodiac-chip"><input type="radio" name="initiator_zodiac" value="Qovg‘a" /><span>Qovg‘a</span></label>
+                <label class="zodiac-chip"><input type="radio" name="initiator_zodiac" value="Baliq" /><span>Baliq</span></label>
+              </div>
+            </fieldset>
+
+            <fieldset class="field field--fieldset">
+              <legend class="field-label">Munosabat turi</legend>
+              <p class="field-hint">Savollar shu turga mos bo‘ladi.</p>
+              <div class="choice-row choice-row--rel" role="radiogroup" aria-label="Munosabat turi">
+                <label class="rel-card">
+                  <input type="radio" name="relationship_type" value="married" checked />
+                  <span class="rel-card__body">
+                    <span class="rel-card__emoji" aria-hidden="true">💍</span>
+                    <span class="rel-card__title">Er-xotin</span>
+                    <span class="rel-card__sub">Oilaviy hayot</span>
+                  </span>
+                </label>
+                <label class="rel-card">
+                  <input type="radio" name="relationship_type" value="friends" />
+                  <span class="rel-card__body">
+                    <span class="rel-card__emoji" aria-hidden="true">🤝</span>
+                    <span class="rel-card__title">Tanishlar</span>
+                    <span class="rel-card__sub">Do‘stlik</span>
+                  </span>
+                </label>
+                <label class="rel-card">
+                  <input type="radio" name="relationship_type" value="dating" />
+                  <span class="rel-card__body">
+                    <span class="rel-card__emoji" aria-hidden="true">💫</span>
+                    <span class="rel-card__title">Uchrashuvdagilar</span>
+                    <span class="rel-card__sub">Yangi bosqich</span>
+                  </span>
+                </label>
+              </div>
+            </fieldset>
+
+            <div class="anketa-actions">
+              <button id="start-test-btn" class="btn btn-primary btn-block" type="submit">
+                Testni boshlash
+              </button>
+            </div>
+          </div>
+        </form>
+
+        <p id="message" class="form-message" role="alert"></p>
+      </div>
+    </main>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

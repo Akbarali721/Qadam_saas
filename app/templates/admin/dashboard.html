@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Qadam Admin</title>
+    <style>
+      :root {
+        --bg: #f6f7fb;
+        --card: #ffffff;
+        --text: #111827;
+        --muted: #6b7280;
+        --border: #e5e7eb;
+        --primary: #6d28d9;
+        --ready: #059669;
+        --soon: #9ca3af;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px 16px;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: flex-start;
+        margin-bottom: 20px;
+      }
+      .eyebrow {
+        margin: 0 0 6px;
+        color: var(--primary);
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        font-size: 12px;
+      }
+      h1, h2, p { margin-top: 0; }
+      .muted { color: var(--muted); }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 14px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+      }
+      .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+      }
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin: 14px 0;
+      }
+      .stat-box {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+        background: #fafafa;
+      }
+      .stat-label {
+        margin-bottom: 5px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .product-card {
+        display: flex;
+        min-height: 300px;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .product-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .badge {
+        border-radius: 999px;
+        padding: 5px 10px;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      .badge-ready {
+        background: #dcfce7;
+        color: var(--ready);
+      }
+      .badge-soon {
+        background: #f3f4f6;
+        color: var(--soon);
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .btn {
+        display: inline-block;
+        border-radius: 10px;
+        padding: 10px 12px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 14px;
+      }
+      .btn-primary {
+        background: var(--primary);
+        color: #fff;
+      }
+      .btn-secondary {
+        background: #eef2ff;
+        color: #4338ca;
+      }
+      .btn-success {
+        border: 0;
+        background: #dcfce7;
+        color: #047857;
+        cursor: pointer;
+      }
+      .btn-danger {
+        border: 0;
+        background: #fee2e2;
+        color: #b91c1c;
+        cursor: pointer;
+      }
+      .btn-disabled {
+        background: #f3f4f6;
+        color: #9ca3af;
+        pointer-events: none;
+      }
+      .section {
+        margin-top: 22px;
+      }
+      .search-form {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .search-input {
+        flex: 1 1 320px;
+        min-height: 40px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 12px;
+        font: inherit;
+      }
+      .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
+        margin: 14px 0;
+      }
+      .detail-item {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 10px;
+        background: #fafafa;
+      }
+      .detail-label {
+        margin-bottom: 5px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .detail-value {
+        overflow-wrap: anywhere;
+        font-weight: 700;
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border-bottom: 1px solid var(--border);
+        padding: 10px 8px;
+        text-align: left;
+        vertical-align: middle;
+      }
+      th {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+      }
+      td .actions {
+        gap: 6px;
+      }
+      form {
+        margin: 0;
+      }
+      @media (max-width: 700px) {
+        .header { display: block; }
+        .stats-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <header class="header">
+        <div>
+          <p class="eyebrow">Qadam Platform</p>
+          <h1>Admin Dashboard</h1>
+          <p class="muted">Product overview for current and future test modules.</p>
+        </div>
+        <div class="actions">
+          <a class="btn btn-secondary" href="/admin/products?token={{ request.query_params.get('token', '') }}">Products</a>
+          <a class="btn btn-secondary" href="/admin/sessions?token={{ request.query_params.get('token', '') }}">Sessions</a>
+          <a class="btn btn-secondary" href="/admin/events?token={{ request.query_params.get('token', '') }}">Events</a>
+          <a class="btn btn-secondary" href="/admin/questions?token={{ request.query_params.get('token', '') }}">Love questions</a>
+        </div>
+      </header>
+
+      <section class="section" aria-label="Premium token search">
+        <h2>Premium Token Search</h2>
+        <div class="card">
+          <form class="search-form" method="get" action="/admin/dashboard">
+            <input type="hidden" name="token" value="{{ request.query_params.get('token', '') }}" />
+            <input
+              class="search-input"
+              type="text"
+              name="session_token"
+              value="{{ session_token_query }}"
+              placeholder="Session token"
+              aria-label="Session token"
+            />
+            <button class="btn btn-primary" type="submit">Qidirish</button>
+          </form>
+
+          {% if search_not_found %}
+          <p class="muted" style="margin-top: 14px;">Token topilmadi.</p>
+          {% endif %}
+
+          {% if searched_payment_session %}
+          <article class="card" style="margin-top: 16px;">
+            <h3>Session Found</h3>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <div class="detail-label">Test type</div>
+                <div class="detail-value">{{ searched_payment_session.product }}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Session token</div>
+                <div class="detail-value">{{ searched_payment_session.token }}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">User name</div>
+                <div class="detail-value">{{ searched_payment_session.user_name }}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Created date</div>
+                <div class="detail-value">{{ searched_payment_session.created_at.strftime("%Y-%m-%d %H:%M") if searched_payment_session.created_at else "-" }}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Payment status</div>
+                <div class="detail-value">{{ searched_payment_session.payment_status }}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">Is premium</div>
+                <div class="detail-value">{{ "Yes" if searched_payment_session.is_premium else "No" }}</div>
+              </div>
+            </div>
+            <div class="actions">
+              <form method="post" action="/payment/approve/{{ searched_payment_session.token }}?token={{ request.query_params.get('token', '') }}">
+                <button class="btn btn-success" type="submit">Premiumni ochish</button>
+              </form>
+              <form method="post" action="/payment/reject/{{ searched_payment_session.token }}?token={{ request.query_params.get('token', '') }}">
+                <button class="btn btn-danger" type="submit">Rad etish</button>
+              </form>
+              <a class="btn btn-secondary" href="{{ searched_payment_session.pdf_url }}" target="_blank" rel="noreferrer">PDF linkni ochish</a>
+              <a class="btn btn-secondary" href="{{ searched_payment_session.result_url }}" target="_blank" rel="noreferrer">Resultni ochish</a>
+            </div>
+          </article>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="section" aria-label="Pending premium payments">
+        <h2>Pending Premium Payments</h2>
+        <div class="card">
+          {% if pending_payments %}
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Session</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for payment in pending_payments %}
+                <tr>
+                  <td>{{ payment.product }}</td>
+                  <td><a href="{{ payment.result_url }}" target="_blank" rel="noreferrer">{{ payment.token[:10] }}...</a></td>
+                  <td>{{ payment.payment_status }}</td>
+                  <td>{{ payment.created_at.strftime("%Y-%m-%d %H:%M") if payment.created_at else "-" }}</td>
+                  <td>
+                    <div class="actions">
+                      <form method="post" action="/payment/approve/{{ payment.token }}?token={{ request.query_params.get('token', '') }}">
+                        <button class="btn btn-success" type="submit">Approve</button>
+                      </form>
+                      <form method="post" action="/payment/reject/{{ payment.token }}?token={{ request.query_params.get('token', '') }}">
+                        <button class="btn btn-danger" type="submit">Reject</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="muted">No pending payment requests.</p>
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="section" aria-label="Product statistics">
+        <h2>Product Statistics</h2>
+        <div class="grid">
+          {% for product in products %}
+          {% set stats = product_stats[product.slug] %}
+          <article class="card product-card">
+            <div>
+              <div class="product-top">
+                <h3>{{ product.title or product.name }}</h3>
+                {% if product.status == "active" %}
+                <span class="badge badge-ready">{{ product.status }}</span>
+                {% else %}
+                <span class="badge badge-soon">{{ product.status }}</span>
+                {% endif %}
+              </div>
+              <p class="muted">{{ product.description }}</p>
+              <div class="stats-grid" aria-label="{{ product.title or product.name }} stats">
+                <div class="stat-box">
+                  <div class="stat-label">Total sessions</div>
+                  <div class="stat-value">{{ stats.total_sessions }}</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-label">Finished sessions</div>
+                  <div class="stat-value">{{ stats.finished_sessions }}</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-label">Today sessions</div>
+                  <div class="stat-value">{{ stats.today_sessions }}</div>
+                </div>
+                <div class="stat-box">
+                  <div class="stat-label">Conversion rate</div>
+                  <div class="stat-value">{{ "%.1f"|format(stats.conversion_rate) }}%</div>
+                </div>
+              </div>
+            </div>
+            <div class="actions">
+              {% if product.public_path != "#" %}
+              <a class="btn btn-primary" href="{{ product.public_path }}">Open</a>
+              {% else %}
+              <span class="btn btn-disabled">Open</span>
+              {% endif %}
+              {% if product.admin_path != "#" %}
+              <a class="btn btn-secondary" href="{{ product.admin_path }}?token={{ request.query_params.get('token', '') }}">Manage</a>
+              {% else %}
+              <span class="btn btn-disabled">Manage</span>
+              {% endif %}
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
