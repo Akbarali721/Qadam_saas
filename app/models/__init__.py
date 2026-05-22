@@ -17,6 +17,8 @@ class Session(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     token: Mapped[str] = mapped_column(String(128), unique=True, index=True, nullable=False)
     creator_telegram_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    initiator_telegram_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    partner_telegram_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
     initiator_name: Mapped[str] = mapped_column(String(120), nullable=False, server_default="")
     initiator_age: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
@@ -44,6 +46,12 @@ class Session(Base):
     payment_status: Mapped[str] = mapped_column(String(16), nullable=False, default="none", server_default="none")
     result_view_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
     premium_interest_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    completion_notify_sent: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default="0",
+    )
 
     status: Mapped[str] = mapped_column(String(32), nullable=False, server_default="created")
     created_at: Mapped[datetime] = mapped_column(

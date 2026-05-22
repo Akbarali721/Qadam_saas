@@ -13,8 +13,8 @@
         <div class="share-step__icon" aria-hidden="true">💌</div>
         <h1 class="love-title">Sevgan insoningizni taklif qiling</h1>
         <p class="love-subtitle">
-          Natijani ko‘rish uchun havolani unga yuboring. U ham savollarga javob bergach,
-          umumiy moslik chiqadi.
+          Quyidagi havolani sevgan insoningizga qo‘lda yuboring. U testni yakunlagach,
+          sizga Telegram orqali natija xabari keladi.
         </p>
         <label class="field">
           <span class="field-label">Taklif havolasi</span>
@@ -23,16 +23,19 @@
             class="love-link-input"
             type="text"
             readonly
-            value="{{ partner_start_url }}"
+            value="{{ share_page_url }}"
           />
         </label>
         <div class="love-actions">
           <button id="share-partner-link" class="love-btn love-btn--primary" type="button">
-            📤 Sevgilimga yuborish
+            📤 Havolani ulashish
           </button>
           <button id="copy-partner-link" class="love-btn love-btn--secondary" type="button">
             🔗 Havolani nusxalash
           </button>
+          <a class="love-btn love-btn--ghost" href="{{ partner_start_url }}">
+            Men hamkorman — testni boshlash
+          </a>
           <a class="love-btn love-btn--ghost" href="/result/{{ token }}">
             Natijani ko‘rish
           </a>

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 
 class SessionCreate(BaseModel):
@@ -14,6 +14,7 @@ class SessionCreate(BaseModel):
         description="married=Er-xotin, friends=Tanishlar, dating=Uchrashuvdagilar",
     )
     creator_telegram_id: str | None = None
+    initiator_telegram_id: str | None = None
 
 
 class PartnerRegister(BaseModel):
@@ -21,6 +22,7 @@ class PartnerRegister(BaseModel):
     partner_age: int = Field(..., ge=18, le=99)
     partner_gender: str = Field(..., pattern="^(ayol|erkak)$")
     partner_zodiac: str = Field(..., max_length=40)
+    partner_telegram_id: str | None = None
 
 
 class SessionRead(BaseModel):
@@ -37,6 +39,8 @@ class SessionRead(BaseModel):
     partner_zodiac: str | None
     respondent_zodiac: str | None
     creator_telegram_id: str | None
+    initiator_telegram_id: str | None
+    partner_telegram_id: str | None
     is_premium: bool
     payment_status: str
     status: str
@@ -44,6 +48,12 @@ class SessionRead(BaseModel):
     answered_at: datetime | None
 
     model_config = ConfigDict(from_attributes=True)
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def user1_telegram_id(self) -> str | None:
+        """Telegram WebApp dan kelgan User1 ID (`initiator_telegram_id`)."""
+        return self.initiator_telegram_id
 
 
 class SessionStateRead(BaseModel):

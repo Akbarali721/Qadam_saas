@@ -1,10 +1,14 @@
 from dataclasses import dataclass
 from datetime import datetime
+import logging
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app import models
+from app.services import stats_service
+
+logger = logging.getLogger(__name__)
 
 PAYMENT_NONE = "none"
 PAYMENT_PENDING = "pending"
@@ -29,6 +33,8 @@ class PaymentSession:
     is_premium: bool
     user_name: str = ""
     pdf_url: str = ""
+    test_type: str = ""
+    creator_telegram_id: str | None = None
 
 
 SESSION_MODELS = (
@@ -58,6 +64,7 @@ def _display_name(row) -> str:
 
 
 def _payment_session_from_row(slug: str, title: str, result_path: str, row) -> PaymentSession:
+    creator_id = getattr(row, "creator_telegram_id", None)
     return PaymentSession(
         product=title,
         token=row.token,
@@ -68,7 +75,38 @@ def _payment_session_from_row(slug: str, title: str, result_path: str, row) -> P
         is_premium=bool(row.is_premium),
         user_name=_display_name(row),
         pdf_url=f"/pdf/{slug}/{row.token}",
+        test_type=slug,
+        creator_telegram_id=creator_id.strip() if creator_id else None,
     )
+
+
+def _count_payment_status(db: Session, model, status: str) -> int:
+    return int(
+        db.execute(
+            select(func.count(model.id)).where(model.payment_status == status),
+        ).scalar_one()
+        or 0,
+    )
+
+
+def _count_sessions(db: Session, model) -> int:
+    return int(db.execute(select(func.count(model.id))).scalar_one() or 0)
+
+
+def get_admin_api_stats(db: Session) -> dict[str, int]:
+    love_stats = stats_service.get_product_stats(db=db, product_slug="love")
+    return {
+        "love_sessions_total": love_stats["total_sessions"],
+        "love_completed_pairs": love_stats["finished_sessions"],
+        "love_premium_pending": _count_payment_status(db, models.Session, PAYMENT_PENDING),
+        "love_premium_approved": _count_payment_status(db, models.Session, PAYMENT_APPROVED),
+        "mbti_sessions_total": _count_sessions(db, models.MbtiSession),
+        "mbti_premium_pending": _count_payment_status(db, models.MbtiSession, PAYMENT_PENDING),
+        "mbti_premium_approved": _count_payment_status(db, models.MbtiSession, PAYMENT_APPROVED),
+        "stress_sessions_total": _count_sessions(db, models.StressSession),
+        "stress_premium_pending": _count_payment_status(db, models.StressSession, PAYMENT_PENDING),
+        "stress_premium_approved": _count_payment_status(db, models.StressSession, PAYMENT_APPROVED),
+    }
 
 
 def find_payment_session_by_token(db: Session, session_token: str) -> PaymentSession | None:
@@ -89,9 +127,17 @@ def set_payment_requested(db: Session, session_token: str):
     session = get_payment_session(db=db, session_token=session_token)
     if session is None:
         return None
+    if session.payment_status == PAYMENT_APPROVED and session.is_premium:
+        return session
     session.payment_status = PAYMENT_PENDING
     db.commit()
     db.refresh(session)
+    logger.info(
+        "set_payment_requested token=%s payment_status=%s is_premium=%s",
+        session.token,
+        session.payment_status,
+        session.is_premium,
+    )
     return session
 
 
@@ -103,6 +149,12 @@ def approve_payment(db: Session, session_token: str):
     session.is_premium = True
     db.commit()
     db.refresh(session)
+    logger.info(
+        "approve_payment token=%s payment_status=%s is_premium=%s",
+        session.token,
+        session.payment_status,
+        session.is_premium,
+    )
     return session
 
 

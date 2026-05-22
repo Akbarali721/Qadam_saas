@@ -300,7 +300,7 @@
               <thead>
                 <tr>
                   <th>Product</th>
-                  <th>Session</th>
+                  <th>Token</th>
                   <th>Status</th>
                   <th>Created</th>
                   <th>Actions</th>
@@ -310,7 +310,7 @@
                 {% for payment in pending_payments %}
                 <tr>
                   <td>{{ payment.product }}</td>
-                  <td><a href="{{ payment.result_url }}" target="_blank" rel="noreferrer">{{ payment.token[:10] }}...</a></td>
+                  <td><code style="word-break: break-all;">{{ payment.token }}</code></td>
                   <td>{{ payment.payment_status }}</td>
                   <td>{{ payment.created_at.strftime("%Y-%m-%d %H:%M") if payment.created_at else "-" }}</td>
                   <td>

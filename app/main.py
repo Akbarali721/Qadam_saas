@@ -15,12 +15,13 @@ from app.crud import (
 from app.core.config import BASE_DIR
 from app.core.database import Base, SessionLocal, engine
 from app.core.migrations import run_platform_startup_migrations
-from app.routers import admin, admin_dashboard, love, mbti, payment, pdf, platform_admin, stress
+from app.routers import admin, admin_api, admin_dashboard, love, mbti, payment, pdf, platform_admin, stress, telegram_bot
 
 
 app = FastAPI(title="Qadam API")
 
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
+app.include_router(telegram_bot.router)
 
 
 @app.exception_handler(RequestValidationError)
@@ -64,12 +65,50 @@ def _print_startup_diagnostics() -> None:
 
 
 def _run_lightweight_migrations() -> None:
+    if engine.dialect.name == "postgresql":
+        with engine.begin() as connection:
+            connection.execute(
+                text("ALTER TABLE sessions ADD COLUMN IF NOT EXISTS creator_telegram_id VARCHAR(64)"),
+            )
+            connection.execute(
+                text("ALTER TABLE sessions ADD COLUMN IF NOT EXISTS initiator_telegram_id VARCHAR(64)"),
+            )
+            connection.execute(
+                text("ALTER TABLE sessions ADD COLUMN IF NOT EXISTS partner_telegram_id VARCHAR(64)"),
+            )
+            connection.execute(
+                text(
+                    "ALTER TABLE sessions ADD COLUMN IF NOT EXISTS completion_notify_sent BOOLEAN "
+                    "NOT NULL DEFAULT FALSE",
+                ),
+            )
+        return
+
     if engine.dialect.name != "sqlite":
         return
 
     with engine.begin() as connection:
         session_columns = connection.execute(text("PRAGMA table_info(sessions)")).mappings().all()
         session_column_names = {column["name"] for column in session_columns}
+        if "creator_telegram_id" not in session_column_names:
+            connection.execute(
+                text("ALTER TABLE sessions ADD COLUMN creator_telegram_id VARCHAR(64)"),
+            )
+        if "initiator_telegram_id" not in session_column_names:
+            connection.execute(
+                text("ALTER TABLE sessions ADD COLUMN initiator_telegram_id VARCHAR(64)"),
+            )
+        if "partner_telegram_id" not in session_column_names:
+            connection.execute(
+                text("ALTER TABLE sessions ADD COLUMN partner_telegram_id VARCHAR(64)"),
+            )
+        if "completion_notify_sent" not in session_column_names:
+            connection.execute(
+                text(
+                    "ALTER TABLE sessions ADD COLUMN completion_notify_sent BOOLEAN "
+                    "NOT NULL DEFAULT 0",
+                ),
+            )
         if "initiator_name" not in session_column_names:
             connection.execute(
                 text(
@@ -186,6 +225,12 @@ def _run_lightweight_migrations() -> None:
                     "NOT NULL DEFAULT 0",
                 ),
             )
+        connection.execute(
+            text(
+                "UPDATE sessions SET initiator_telegram_id = creator_telegram_id "
+                "WHERE initiator_telegram_id IS NULL AND creator_telegram_id IS NOT NULL",
+            ),
+        )
         connection.execute(
             text("UPDATE sessions SET payment_status = 'approved' WHERE is_premium = 1"),
         )
@@ -482,5 +527,6 @@ app.include_router(stress.router)
 app.include_router(payment.router)
 app.include_router(pdf.router)
 app.include_router(admin_dashboard.router)
+app.include_router(admin_api.router)
 app.include_router(platform_admin.router)
 app.include_router(admin.router)

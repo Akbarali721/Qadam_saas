@@ -1,5 +1,3 @@
-const SESSION_TOKEN_KEY = "relationship_test_token";
-
 function setMessage(text) {
   const messageEl = document.getElementById("message");
   if (messageEl) {
@@ -7,16 +5,82 @@ function setMessage(text) {
   }
 }
 
-function getToken() {
-  return localStorage.getItem(SESSION_TOKEN_KEY);
-}
-
 function setToken(token) {
-  localStorage.setItem(SESSION_TOKEN_KEY, token);
+  return token || "";
 }
 
-function clearToken() {
-  localStorage.removeItem(SESSION_TOKEN_KEY);
+const INITIATOR_TG_ID_KEY = "initiator_tg_id";
+
+function normalizeTelegramId(raw) {
+  if (raw === undefined || raw === null) {
+    return null;
+  }
+  const trimmed = String(raw).trim();
+  return /^\d+$/.test(trimmed) ? trimmed : null;
+}
+
+function readTgIdFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return normalizeTelegramId(params.get("tg_id"));
+}
+
+function persistInitiatorTelegramId(id) {
+  const normalized = normalizeTelegramId(id);
+  if (!normalized) {
+    return null;
+  }
+  try {
+    sessionStorage.setItem(INITIATOR_TG_ID_KEY, normalized);
+  } catch (_error) {
+    // ignore private mode / quota errors
+  }
+  const hidden = document.getElementById("initiator-tg-id");
+  if (hidden) {
+    hidden.value = normalized;
+  }
+  return normalized;
+}
+
+function getTelegramUserId() {
+  const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  const fromSdk = normalizeTelegramId(user?.id);
+  if (fromSdk) {
+    return persistInitiatorTelegramId(fromSdk);
+  }
+
+  const fromHidden = normalizeTelegramId(
+    document.getElementById("initiator-tg-id")?.value,
+  );
+  if (fromHidden) {
+    return persistInitiatorTelegramId(fromHidden);
+  }
+
+  try {
+    const fromStorage = normalizeTelegramId(
+      sessionStorage.getItem(INITIATOR_TG_ID_KEY),
+    );
+    if (fromStorage) {
+      return fromStorage;
+    }
+  } catch (_error) {
+    // ignore
+  }
+
+  const fromUrl = readTgIdFromUrl();
+  if (fromUrl) {
+    return persistInitiatorTelegramId(fromUrl);
+  }
+
+  return null;
+}
+
+function initIndexTelegramId() {
+  const fromUrl = readTgIdFromUrl();
+  if (fromUrl) {
+    persistInitiatorTelegramId(fromUrl);
+    return;
+  }
+  getTelegramUserId();
 }
 
 function dimensionLabel(key) {
@@ -213,10 +277,6 @@ function renderFullAnalysis(result) {
   });
 }
 
-function quizRoleStorageKey(token) {
-  return `munosabat_quiz_role_${token}`;
-}
-
 function hasBothZodiacs(result) {
   const a = (result.initiator_zodiac || "").trim();
   const b = (
@@ -275,7 +335,11 @@ async function startTest() {
     const relEl = form?.querySelector(
       'input[name="relationship_type"]:checked',
     );
-    const response = await fetch("/api/sessions", {
+    const telegramUserId = getTelegramUserId();
+    const createSessionUrl = telegramUserId
+      ? `/api/sessions?tg_id=${encodeURIComponent(telegramUserId)}`
+      : "/api/sessions";
+    const response = await fetch(createSessionUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -284,6 +348,8 @@ async function startTest() {
         initiator_gender: genderEl ? genderEl.value : "",
         initiator_zodiac: zodiacEl ? zodiacEl.value : "",
         relationship_type: relEl ? relEl.value : "married",
+        initiator_telegram_id: telegramUserId || null,
+        creator_telegram_id: telegramUserId || null,
       }),
     });
 
@@ -298,7 +364,6 @@ async function startTest() {
 
     setToken(session.token);
     const tok = session.token;
-    sessionStorage.setItem(quizRoleStorageKey(tok), "initiator");
     window.location.href = `/quiz/init/${encodeURIComponent(tok)}`;
   } catch (error) {
     setMessage(error.message || "Sessiya yaratilmadi");
@@ -312,26 +377,28 @@ function hydrateTokenFromUrl() {
   const bodyToken = document.body?.dataset?.token;
   if (bodyToken) {
     setToken(bodyToken);
-    return;
+    return bodyToken;
   }
 
   const hiddenToken = document.getElementById("session-token")?.value;
   if (hiddenToken) {
     setToken(hiddenToken);
-    return;
+    return hiddenToken;
   }
 
   const resultPathMatch = window.location.pathname.match(/^\/result\/([A-Za-z0-9_-]+)$/);
   if (resultPathMatch && resultPathMatch[1]) {
     setToken(resultPathMatch[1]);
-    return;
+    return resultPathMatch[1];
   }
 
   const params = new URLSearchParams(window.location.search);
   const tokenFromUrl = params.get("token");
   if (tokenFromUrl) {
     setToken(tokenFromUrl);
+    return tokenFromUrl;
   }
+  return "";
 }
 
 function getBootstrappedQuestions() {
@@ -432,7 +499,7 @@ async function resolveQuizRole(token, preferredRole) {
 
   if (requested === "initiator") {
     if (st.initiator_answered) {
-      window.location.replace(`/share/${encodeURIComponent(token)}`);
+      window.location.replace(`/share/${encodeURIComponent(token)}?host=1`);
       return null;
     }
     return "initiator";
@@ -443,7 +510,7 @@ async function resolveQuizRole(token, preferredRole) {
     return null;
   }
   if (st.partner_answered) {
-    setMessage("Sizning javoblaringiz allaqachon yuborilgan. Rahmat!");
+    window.location.replace(`/partner/complete/${encodeURIComponent(token)}`);
     return null;
   }
   return "partner";
@@ -497,8 +564,7 @@ async function getSessionState(token) {
 }
 
 async function loadQuestionsPage() {
-  hydrateTokenFromUrl();
-  const token = getToken();
+  const token = hydrateTokenFromUrl();
   if (!token) {
     window.location.href = "/";
     return;
@@ -511,12 +577,7 @@ async function loadQuestionsPage() {
     const roleFromHidden = (
       document.getElementById("quiz-role")?.value || ""
     ).trim().toLowerCase();
-    const storedRole = (
-      sessionStorage.getItem(quizRoleStorageKey(token)) || ""
-    )
-      .trim()
-      .toLowerCase();
-    const preferredRole = roleFromUrl || roleFromBody || roleFromHidden || storedRole || "partner";
+    const preferredRole = roleFromUrl || roleFromBody || roleFromHidden || "partner";
     const role = await resolveQuizRole(token, preferredRole);
     if (!role) {
       return;
@@ -526,6 +587,10 @@ async function loadQuestionsPage() {
       (role === "initiator" && state.initiator_answered) ||
       (role === "partner" && state.partner_answered)
     ) {
+      if (role === "partner") {
+        window.location.replace(`/partner/complete/${encodeURIComponent(token)}`);
+        return;
+      }
       setMessage("Sizning javoblaringiz allaqachon yuborilgan. Rahmat!");
       const submitBtn = document.getElementById("submit-answers-btn");
       if (submitBtn) {
@@ -629,18 +694,14 @@ async function loadQuestionsPage() {
             const data = await submitResponse.json();
             if (data.status === "completed") {
               if (role === "initiator") {
-                window.location.href = `/share/${encodeURIComponent(token)}`;
+                window.location.href = `/share/${encodeURIComponent(token)}?host=1`;
                 return;
               }
-              setMessage(
-                "Rahmat! Javoblaringiz muvaffaqiyatli saqlandi. Natija ikkala tomon javoblaridan hisoblanadi.",
-              );
-              if (submitButton) {
-                submitButton.disabled = true;
-              }
+              window.location.href = `/partner/complete/${encodeURIComponent(token)}`;
+              return;
             } else {
               if (role === "initiator") {
-                window.location.href = `/share/${encodeURIComponent(token)}`;
+                window.location.href = `/share/${encodeURIComponent(token)}?host=1`;
                 return;
               }
               setMessage("Rahmat! Javoblaringiz saqlandi.");
@@ -662,8 +723,7 @@ async function loadQuestionsPage() {
 }
 
 async function loadResultPage() {
-  hydrateTokenFromUrl();
-  const token = getToken();
+  const token = hydrateTokenFromUrl();
   if (!token) {
     window.location.href = "/";
     return;
@@ -783,6 +843,7 @@ async function loadResultPage() {
 function init() {
   const page = document.body.dataset.page;
   if (page === "index") {
+    initIndexTelegramId();
     const initiatorForm = document.getElementById("initiator-form");
     if (initiatorForm) {
       initiatorForm.addEventListener("submit", (event) => {
@@ -829,13 +890,13 @@ function init() {
             partner_age: ageInput ? Number(ageInput.value) : 0,
             partner_gender: genderEl ? genderEl.value : "",
             partner_zodiac: zodiacEl ? zodiacEl.value : "",
+            partner_telegram_id: getTelegramUserId(),
           }),
         });
         if (!res.ok) {
           throw new Error(await parseError(res));
         }
         setToken(token);
-        sessionStorage.setItem(quizRoleStorageKey(token), "partner");
         window.location.href = `/questions.html?token=${encodeURIComponent(token)}&role=partner`;
       } catch (error) {
         if (msg) {

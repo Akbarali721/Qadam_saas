@@ -1,20 +1,154 @@
 import json
+import logging
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session as DbSession
 
 from app import crud, models, schemas
-from app.core.database import get_db
+from app.core.database import SessionLocal, get_db
 from app.core.templates import templates
 from app.services import pdf_service
+from app.services.telegram_notify import (
+    notify_love_user1_premium_unlocked,
+    notify_user1_test_completed,
+    resolve_public_base_url,
+    user1_telegram_id,
+)
 
 router = APIRouter(tags=["love"])
+logger = logging.getLogger(__name__)
+
+
+def _apply_tg_id_to_session_create(
+    payload: schemas.SessionCreate,
+    tg_id: str | None,
+) -> schemas.SessionCreate:
+    raw = (tg_id or "").strip()
+    if not raw.isdigit():
+        return payload
+    if payload.creator_telegram_id:
+        return payload
+    return payload.model_copy(
+        update={
+            "creator_telegram_id": raw,
+            "initiator_telegram_id": raw,
+        },
+    )
+
+
+def _should_notify_user1_after_submit(
+    *,
+    completed: bool,
+    session: models.Session,
+    db: DbSession,
+) -> bool:
+    if not completed:
+        return False
+    state = crud.get_session_quiz_state(db=db, session=session)
+    return bool(state["initiator_answered"] and state["partner_answered"])
+
+
+async def _notify_initiator_partner_completed(token: str, fallback_base_url: str) -> None:
+    """Ikkala tomon tugagach User1 ga bir marta Telegram; xatoliklar natija oqimini buzmaydi."""
+    logger.info("Telegram notify task started token=%s fallback_base_url=%s", token, fallback_base_url)
+    db = SessionLocal()
+    try:
+        session = crud.get_session_by_token(db, token)
+        if session is None:
+            logger.warning("Telegram notify skipped: session not found token=%s", token)
+            return
+        state = crud.get_session_quiz_state(db=db, session=session)
+        has_result = crud.get_result_by_session_id(db=db, session_id=session.id) is not None
+        logger.info(
+            "Telegram notify pre-check token=%s session_id=%s status=%s "
+            "creator_telegram_id=%s initiator_telegram_id=%s payment_status=%s "
+            "initiator_answered=%s partner_answered=%s completion_notify_sent=%s has_result=%s",
+            token,
+            session.id,
+            session.status,
+            session.creator_telegram_id,
+            session.initiator_telegram_id,
+            session.payment_status,
+            state["initiator_answered"],
+            state["partner_answered"],
+            getattr(session, "completion_notify_sent", False),
+            has_result,
+        )
+        if getattr(session, "completion_notify_sent", False):
+            logger.info("Telegram notify skipped: already sent token=%s", token)
+            return
+        if session.status != "completed":
+            logger.warning(
+                "Telegram notify skipped: status not completed token=%s status=%s",
+                token,
+                session.status,
+            )
+            return
+        if not state["partner_answered"]:
+            logger.warning("Telegram notify skipped: partner not answered token=%s", token)
+            return
+        if not state["initiator_answered"]:
+            logger.warning("Telegram notify skipped: initiator not answered token=%s", token)
+            return
+        raw_id = user1_telegram_id(session)
+        if not raw_id:
+            logger.warning(
+                "Telegram notify skipped: no User1 telegram id token=%s "
+                "creator_telegram_id=%s initiator_telegram_id=%s",
+                token,
+                session.creator_telegram_id,
+                session.initiator_telegram_id,
+            )
+            return
+        try:
+            telegram_int = int(raw_id)
+        except ValueError:
+            logger.warning("Invalid creator_telegram_id=%s token=%s", raw_id, token)
+            return
+        logger.info(
+            "Telegram notify sending token=%s session_id=%s chat_id=%s",
+            token,
+            session.id,
+            raw_id,
+        )
+        try:
+            ok = await notify_user1_test_completed(
+                telegram_int,
+                token,
+                fallback_base_url=fallback_base_url,
+            )
+        except Exception:
+            logger.exception(
+                "Telegram notify_user1_test_completed failed token=%s chat_id=%s",
+                token,
+                raw_id,
+            )
+            return
+        if ok:
+            session.completion_notify_sent = True
+            db.commit()
+            logger.info("Telegram notify marked sent token=%s session_id=%s", token, session.id)
+        else:
+            logger.warning(
+                "Telegram notify API returned failure token=%s chat_id=%s",
+                token,
+                raw_id,
+            )
+    except Exception:
+        logger.exception("notify initiator partner completed task failed token=%s", token)
+    finally:
+        db.close()
 
 
 @router.get("/", response_class=HTMLResponse)
-def index_page(request: Request):
-    return templates.TemplateResponse(request=request, name="love/index.html")
+def index_page(request: Request, tg_id: str | None = None):
+    raw = (tg_id or request.query_params.get("tg_id") or "").strip()
+    return templates.TemplateResponse(
+        request=request,
+        name="love/index.html",
+        context={"tg_id": raw},
+    )
 
 
 @router.get("/share/{token}", response_class=HTMLResponse)
@@ -25,30 +159,83 @@ def share_page(request: Request, token: str, db: DbSession = Depends(get_db)):
     state = crud.get_session_quiz_state(db=db, session=session)
     if not state["initiator_answered"]:
         return RedirectResponse(url=f"/quiz/init/{token}", status_code=303)
-    base = str(request.base_url).rstrip("/")
+    if not state["partner_registered"] and request.query_params.get("host") != "1":
+        return RedirectResponse(url=f"/start/{token}", status_code=303)
+    public_base = resolve_public_base_url(
+        fallback_base_url=str(request.base_url).rstrip("/"),
+    )
+    share_page_url = f"{public_base}/share/{token}"
+    partner_start_url = f"{public_base}/start/{token}"
     return templates.TemplateResponse(
         request=request,
         name="love/share.html",
         context={
             "token": token,
             "initiator_name": session.initiator_name,
-            "partner_start_url": f"{base}/start/{token}",
-            "initiator_questions_url": f"{base}/questions.html?token={token}&role=initiator",
+            "share_page_url": share_page_url,
+            "partner_start_url": partner_start_url,
+            "initiator_questions_url": f"{public_base}/questions.html?token={token}&role=initiator",
         },
     )
 
 
 @router.get("/start/{token}", response_class=HTMLResponse)
-def partner_landing_page(request: Request, token: str, db: DbSession = Depends(get_db)):
+def partner_landing_page(
+    request: Request,
+    token: str,
+    tg_id: int | None = None,
+    partner_tg_id: int | None = None,
+    db: DbSession = Depends(get_db),
+):
     session = crud.get_session_by_token(db=db, token=token)
     if session is None:
         raise HTTPException(status_code=404, detail="Sessiya topilmadi")
+    if tg_id is not None and not session.initiator_telegram_id:
+        session.initiator_telegram_id = str(tg_id)
+        db.commit()
+        db.refresh(session)
+    if partner_tg_id is not None:
+        session = crud.set_partner_telegram_id(
+            db=db,
+            session=session,
+            telegram_id=str(partner_tg_id),
+        )
     return templates.TemplateResponse(
         request=request,
         name="love/partner.html",
         context={
             "token": token,
             "initiator_name": session.initiator_name,
+        },
+    )
+
+
+@router.get("/premium/{token}")
+def premium_webapp_entry(token: str):
+    """Telegram inline tugma: premium blokiga yo‘naltirish (natija sahifasi)."""
+    return RedirectResponse(url=f"/result/{token}", status_code=302)
+
+
+@router.get("/partner/complete/{token}", response_class=HTMLResponse)
+def partner_complete_page(request: Request, token: str, db: DbSession = Depends(get_db)):
+    session = crud.get_session_by_token(db=db, token=token)
+    if session is None:
+        raise HTTPException(status_code=404, detail="Sessiya topilmadi")
+    state = crud.get_session_quiz_state(db=db, session=session)
+    if not state["partner_answered"]:
+        return RedirectResponse(url=f"/questions.html?token={token}&role=partner", status_code=303)
+    user1_id = user1_telegram_id(session)
+    message = (
+        "Yakunlandi ✅ Natija saqlandi."
+        if user1_id
+        else "Yakunlandi ✅ Natija saqlandi. User1 Telegram orqali boshlamagan bo‘lsa, natijani ulashish uchun token kerak bo‘ladi."
+    )
+    return templates.TemplateResponse(
+        request=request,
+        name="love/partner_complete.html",
+        context={
+            "token": token,
+            "message": message,
         },
     )
 
@@ -121,15 +308,36 @@ def create_session(
     payload: schemas.SessionCreate,
     db: DbSession = Depends(get_db),
 ) -> schemas.SessionCreateRead:
+    tg_from_query = request.query_params.get("tg_id")
+    payload = _apply_tg_id_to_session_create(payload, tg_from_query)
+    logger.info(
+        "create_session request tg_id_query=%s body_creator=%s body_initiator=%s",
+        tg_from_query,
+        payload.creator_telegram_id,
+        payload.initiator_telegram_id,
+    )
     session = crud.create_session(db=db, payload=payload)
-    base = str(request.base_url).rstrip("/")
+    logger.info(
+        "Session created token=%s creator_telegram_id=%s initiator_telegram_id=%s",
+        session.token,
+        session.creator_telegram_id,
+        session.initiator_telegram_id,
+    )
+    if not session.creator_telegram_id:
+        logger.warning(
+            "Session created without creator_telegram_id token=%s — User1 notify will not work",
+            session.token,
+        )
+    public_base = resolve_public_base_url(
+        fallback_base_url=str(request.base_url).rstrip("/"),
+    )
     token = session.token
-    share_page_url = f"{base}/share/{token}"
-    partner_join_url = f"{base}/start/{token}"
-    initiator_questions_url = f"{base}/questions.html?token={token}&role=initiator"
+    share_page_url = f"{public_base}/share/{token}"
+    partner_join_url = f"{public_base}/start/{token}"
+    initiator_questions_url = f"{public_base}/questions.html?token={token}&role=initiator"
     return schemas.SessionCreateRead(
         **schemas.SessionRead.model_validate(session).model_dump(),
-        share_url=partner_join_url,
+        share_url=share_page_url,
         share_page_url=share_page_url,
         partner_join_url=partner_join_url,
         initiator_questions_url=initiator_questions_url,
@@ -166,11 +374,21 @@ def get_session_state(token: str, db: DbSession = Depends(get_db)) -> schemas.Se
 
 
 @router.post("/api/sessions/{token}/unlock-premium", tags=["sessions"])
-def unlock_premium(token: str, db: DbSession = Depends(get_db)) -> dict[str, bool | str]:
+def unlock_premium(
+    token: str,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    db: DbSession = Depends(get_db),
+) -> dict[str, bool | str]:
     session = crud.get_session_by_token(db=db, token=token)
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
     unlocked = crud.unlock_session_premium(db=db, session=session)
+    background_tasks.add_task(
+        notify_love_user1_premium_unlocked,
+        token,
+        fallback_base_url=str(request.base_url).rstrip("/"),
+    )
     return {"ok": True, "token": unlocked.token, "is_premium": unlocked.is_premium}
 
 
@@ -209,6 +427,8 @@ def get_session_questions(
 def submit_answers(
     token: str,
     payload: schemas.AnswerSubmitRequest,
+    background_tasks: BackgroundTasks,
+    request: Request,
     db: DbSession = Depends(get_db),
 ) -> dict[str, str]:
     session = crud.get_session_by_token(db=db, token=token)
@@ -218,10 +438,61 @@ def submit_answers(
     if session.status == "completed":
         raise HTTPException(status_code=409, detail="Test allaqachon yakunlangan")
 
+    role = payload.role.strip().lower()
     try:
         completed = crud.submit_session_answers(db=db, session=session, payload=payload)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    session = crud.get_session_by_token(db=db, token=token)
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    state = crud.get_session_quiz_state(db=db, session=session)
+    has_result = crud.get_result_by_session_id(db=db, session_id=session.id) is not None
+    logger.info(
+        "submit_answers token=%s session_id=%s role=%s completed=%s status=%s "
+        "creator_telegram_id=%s initiator_telegram_id=%s payment_status=%s "
+        "initiator_answered=%s partner_answered=%s has_result=%s",
+        token,
+        session.id,
+        role,
+        completed,
+        session.status,
+        session.creator_telegram_id,
+        session.initiator_telegram_id,
+        session.payment_status,
+        state["initiator_answered"],
+        state["partner_answered"],
+        has_result,
+    )
+
+    if _should_notify_user1_after_submit(completed=completed, session=session, db=db):
+        fallback_base = resolve_public_base_url(
+            fallback_base_url=str(request.base_url).rstrip("/"),
+        )
+        logger.info(
+            "Scheduling User1 Telegram notify token=%s session_id=%s role=%s public_base=%s",
+            token,
+            session.id,
+            role,
+            fallback_base or "(empty)",
+        )
+        background_tasks.add_task(
+            _notify_initiator_partner_completed,
+            token,
+            str(request.base_url).rstrip("/"),
+        )
+    else:
+        logger.info(
+            "Skipping User1 Telegram notify token=%s completed=%s role=%s "
+            "initiator_answered=%s partner_answered=%s",
+            token,
+            completed,
+            role,
+            state["initiator_answered"],
+            state["partner_answered"],
+        )
 
     return {"status": "completed" if completed else "partial"}
 

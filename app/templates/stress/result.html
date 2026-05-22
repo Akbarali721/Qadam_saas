@@ -329,15 +329,24 @@
         {% if not is_premium %}
         <section class="profile-card locked-card profile-card-wide" aria-labelledby="premium-title">
           <div class="locked-content">
-            <h2 id="premium-title">🔒 Batafsil tahlil</h2>
+            <h2 id="premium-title">{{ "⏳ Premium so‘rov kutilmoqda" if payment_status == "pending" else "🔒 Batafsil tahlil" }}</h2>
             <p class="premium-price">Narxi: 25 000 so‘m</p>
             <p class="payment-message">
-              To‘lov admin orqali qabul qilinadi. Admin bilan bog‘laning va test tokeningizni yuboring.
-              Tasdiqlangandan so‘ng sizga PDF tahlil yuboriladi.
+              {% if payment_status == "pending" %}
+              So‘rovingiz bazaga saqlandi. Admin tasdiqlagandan so‘ng shu result token orqali premium tahlil ochiladi.
+              {% elif payment_status == "rejected" %}
+              Avvalgi so‘rov rad etilgan. Qayta so‘rov yuborishingiz yoki admin bilan bog‘lanishingiz mumkin.
+              {% else %}
+              Premium tahlilni olish uchun so‘rov yuboring. Result token doimiy saqlanadi va admin tasdiqlagandan so‘ng premium tahlil shu sahifada ochiladi.
+              {% endif %}
             </p>
-            <a class="btn btn-primary" href="https://t.me/YOUR_USERNAME?text=Salom%2C%20men%20to%E2%80%98liq%20tahlilni%20olmoqchiman.%20Test%20tokenim%3A%20{{ token }}" target="_blank" rel="noopener noreferrer">
-              Admin bilan bog‘lanish
-            </a>
+            {% if payment_status == "pending" %}
+            <a class="btn btn-primary" href="/payment/pending/{{ token }}">So‘rov holatini ko‘rish</a>
+            {% else %}
+            <form method="post" action="/payment/request/{{ token }}">
+              <button class="btn btn-primary" type="submit">Premiumni so‘rash</button>
+            </form>
+            {% endif %}
           </div>
         </section>
         {% endif %}

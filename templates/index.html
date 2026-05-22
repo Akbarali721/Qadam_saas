@@ -56,6 +56,12 @@
         </section>
 
         <form id="initiator-form" class="anketa-form love-form-panel" novalidate>
+          <input
+            type="hidden"
+            id="initiator-tg-id"
+            name="initiator_tg_id"
+            value="{{ tg_id|default('', true) }}"
+          />
           <h2 id="profile-form" class="love-form-title">Profilingizni to‘ldiring</h2>
           <div id="step-form" class="anketa-step">
             <div class="field">
@@ -169,6 +175,7 @@
       </div>
     </main>
 
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="/static/app.js"></script>
   </body>
 </html>

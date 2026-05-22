@@ -1,5 +1,6 @@
 from datetime import datetime
 import json
+import logging
 import random
 from uuid import uuid4
 
@@ -252,6 +253,9 @@ def get_session_questions(db: Session, session: models.Session) -> list[models.Q
     return [by_id[qid] for qid in stored_ids if qid in by_id]
 
 
+logger = logging.getLogger(__name__)
+
+
 def create_session(db: Session, payload: schemas.SessionCreate) -> models.Session:
     relationship_type = _validate_relationship_type(payload.relationship_type)
     respondent_gender = _derive_respondent_gender(payload.initiator_gender)
@@ -261,9 +265,16 @@ def create_session(db: Session, payload: schemas.SessionCreate) -> models.Sessio
         respondent_gender=respondent_gender,
         target_count=SESSION_QUESTION_COUNT,
     )
+    creator_telegram_id = (payload.creator_telegram_id or "").strip() or None
+    initiator_telegram_id = (payload.initiator_telegram_id or "").strip() or None
+    if not creator_telegram_id and initiator_telegram_id:
+        creator_telegram_id = initiator_telegram_id
+    if not initiator_telegram_id and creator_telegram_id:
+        initiator_telegram_id = creator_telegram_id
     db_obj = models.Session(
         token=_generate_unique_session_token(db),
-        creator_telegram_id=payload.creator_telegram_id,
+        creator_telegram_id=creator_telegram_id,
+        initiator_telegram_id=initiator_telegram_id,
         initiator_name=payload.initiator_name.strip(),
         initiator_age=payload.initiator_age,
         initiator_gender=payload.initiator_gender,
@@ -278,6 +289,12 @@ def create_session(db: Session, payload: schemas.SessionCreate) -> models.Sessio
     db.add(db_obj)
     db.commit()
     db.refresh(db_obj)
+    logger.info(
+        "Saved session token=%s creator_telegram_id=%s initiator_telegram_id=%s",
+        db_obj.token,
+        db_obj.creator_telegram_id,
+        db_obj.initiator_telegram_id,
+    )
     return db_obj
 
 
@@ -289,16 +306,29 @@ def register_partner(
 ) -> None:
     if session.partner_name.strip():
         raise ValueError("Hamkor allaqachon ro‘yxatdan o‘tgan")
+    if payload.partner_telegram_id and not session.partner_telegram_id:
+        session.partner_telegram_id = payload.partner_telegram_id
     session.partner_name = payload.partner_name.strip()
     session.partner_age = payload.partner_age
     session.partner_gender = payload.partner_gender
     z = _validate_zodiac(payload.partner_zodiac)
     session.partner_zodiac = z
     session.respondent_zodiac = z
-    if session.status == "created":
+    if session.status in ("created", "partner_started"):
         session.status = "in_progress"
     db.commit()
     db.refresh(session)
+
+
+def set_partner_telegram_id(db: Session, *, session: models.Session, telegram_id: str) -> models.Session:
+    normalized = telegram_id.strip()
+    if normalized and not session.partner_telegram_id:
+        session.partner_telegram_id = normalized
+        if session.status == "created":
+            session.status = "partner_started"
+        db.commit()
+        db.refresh(session)
+    return session
 
 
 def _parse_answer_blob(raw: str | None) -> list[dict[str, int]]:
