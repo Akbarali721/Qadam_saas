@@ -23,6 +23,9 @@ ALLOWED_DIMENSIONS: set[str] = {
     "trust",
     "attention",
     "emotional_closeness",
+    "future_vision",
+    "boundaries",
+    "responsibility",
 }
 ALLOWED_GENDER_TARGETS: set[str] = {"female", "male", "both"}
 UZBEK_ZODIACS: tuple[str, ...] = (
@@ -41,12 +44,15 @@ UZBEK_ZODIACS: tuple[str, ...] = (
 )
 
 RELATIONSHIP_TYPES: tuple[str, ...] = ("married", "friends", "dating")
-SESSION_QUESTION_COUNT = 8
+SESSION_QUESTION_COUNT = question_seeds.SESSION_QUESTION_COUNT
 BALANCE_DIMENSIONS: tuple[str, ...] = (
     "communication",
     "trust",
-    "attention",
     "emotional_closeness",
+    "attention",
+    "future_vision",
+    "boundaries",
+    "responsibility",
 )
 MBTI_DIMENSIONS: tuple[str, ...] = ("IE", "NS", "TF", "PJ")
 MBTI_POLES: tuple[str, ...] = ("I", "E", "N", "S", "T", "F", "P", "J")
@@ -520,7 +526,8 @@ def _validate_dimension(dimension: str) -> str:
     normalized = dimension.strip()
     if normalized not in ALLOWED_DIMENSIONS:
         raise ValueError(
-            "Dimension must be one of: communication, trust, attention, emotional_closeness",
+            "Dimension must be one of: communication, trust, attention, "
+            "emotional_closeness, future_vision, boundaries, responsibility",
         )
     return normalized
 
