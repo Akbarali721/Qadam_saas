@@ -766,11 +766,25 @@ body[data-page="result"] .diff-heading {
   color: #9a3412;
 }
 
-body[data-page="result"] .diff-text {
+body[data-page="result"] .diff-text,
+body[data-page="result"] .diff-subtext,
+body[data-page="result"] .diff-rec {
   margin: 0;
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.55;
   color: #7c2d12;
+}
+
+body[data-page="result"] .diff-subtext {
+  margin-top: 10px;
+}
+
+body[data-page="result"] .diff-rec {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.55);
+  font-weight: 500;
 }
 
 body[data-page="result"] .section-title {
@@ -795,23 +809,79 @@ body[data-page="result"] .teaser-grid {
 
 body[data-page="result"] .teaser-card {
   margin: 0;
-  padding: 14px 14px 16px;
-  border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  background: #fafafa;
+  padding: 16px 16px 18px;
+  border-radius: 20px;
+  border: 1px solid #eadff8;
+  background: #fbfaff;
+}
+
+body[data-page="result"] .teaser-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
 }
 
 body[data-page="result"] .teaser-title {
-  margin: 0 0 4px;
+  margin: 0;
   font-size: 15px;
-  color: #111827;
+  color: #5b21b6;
+}
+
+body[data-page="result"] .teaser-status {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+body[data-page="result"] .teaser-status--high {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+body[data-page="result"] .teaser-status--mid {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+body[data-page="result"] .teaser-status--low {
+  background: #fce7f3;
+  color: #9d174d;
 }
 
 body[data-page="result"] .teaser-pct {
-  margin: 0 0 8px;
-  font-size: 22px;
+  margin: 0 0 10px;
+  font-size: 24px;
+  font-weight: 800;
+  color: #7c3aed;
+}
+
+body[data-page="result"] .teaser-explanation,
+body[data-page="result"] .teaser-recommendation {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #4b5563;
+}
+
+body[data-page="result"] .teaser-rec-label {
+  margin: 12px 0 4px;
+  font-size: 12px;
   font-weight: 700;
-  color: #2563eb;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #7c3aed;
+}
+
+body[data-page="result"] .teaser-recommendation {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #faf5ff 0%, #fff0f7 100%);
+  color: #4c1d95;
 }
 
 body[data-page="result"] .teaser-body {

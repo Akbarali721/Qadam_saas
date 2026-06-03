@@ -334,6 +334,98 @@
         </div>
       </section>
 
+      <section class="section" aria-label="Love Test Funnel">
+        <h2>Love Test Funnel</h2>
+        <div class="grid">
+          <article class="card">
+            <div class="stat-label">Started</div>
+            <div class="stat-value">{{ love_test_funnel.total_started }}</div>
+          </article>
+          <article class="card">
+            <div class="stat-label">In progress</div>
+            <div class="stat-value">{{ love_test_funnel.total_in_progress }}</div>
+          </article>
+          <article class="card">
+            <div class="stat-label">Completed</div>
+            <div class="stat-value">{{ love_test_funnel.total_completed }}</div>
+          </article>
+          <article class="card">
+            <div class="stat-label">Abandoned</div>
+            <div class="stat-value">{{ love_test_funnel.total_abandoned }}</div>
+          </article>
+          <article class="card">
+            <div class="stat-label">Completion rate</div>
+            <div class="stat-value">{{ "%.1f"|format(love_test_funnel.completion_rate) }}%</div>
+          </article>
+          <article class="card">
+            <div class="stat-label">Dropoff rate</div>
+            <div class="stat-value">{{ "%.1f"|format(love_test_funnel.dropoff_rate) }}%</div>
+          </article>
+          <article class="card">
+            <div class="stat-label">Avg answered questions</div>
+            <div class="stat-value">{{ "%.2f"|format(love_test_funnel.average_answered_questions) }}</div>
+          </article>
+        </div>
+
+        <div class="card section" style="margin-top: 14px;">
+          <h3 style="margin-top: 0;">By relationship type</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Started</th>
+                  <th>In progress</th>
+                  <th>Completed</th>
+                  <th>Abandoned</th>
+                  <th>Completion</th>
+                  <th>Dropoff</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in love_test_funnel.by_relationship_type %}
+                <tr>
+                  <td>{{ row.relationship_type }}</td>
+                  <td>{{ row.total_started }}</td>
+                  <td>{{ row.total_in_progress }}</td>
+                  <td>{{ row.total_completed }}</td>
+                  <td>{{ row.total_abandoned }}</td>
+                  <td>{{ "%.1f"|format(row.completion_rate) }}%</td>
+                  <td>{{ "%.1f"|format(row.dropoff_rate) }}%</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card section" style="margin-top: 14px;">
+          <h3 style="margin-top: 0;">Dropoff by question index</h3>
+          {% if love_test_funnel.dropoff_by_question_index %}
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Question index</th>
+                  <th>Abandoned sessions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in love_test_funnel.dropoff_by_question_index %}
+                <tr>
+                  <td>{{ row.question_index }}</td>
+                  <td>{{ row.count }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="muted">No abandoned sessions yet.</p>
+          {% endif %}
+        </div>
+      </section>
+
       <section class="section" aria-label="Product statistics">
         <h2>Product Statistics</h2>
         <div class="grid">

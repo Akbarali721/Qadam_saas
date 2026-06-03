@@ -16,13 +16,18 @@
           linear-gradient(180deg, #f0fdfa 0%, #eef2ff 48%, #fff 100%);
         color: #0f172a;
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        -webkit-overflow-scrolling: touch;
       }
-      .result-shell { max-width: 980px; margin: 0 auto; padding: 22px 14px 44px; }
+      .result-shell {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 20px 14px 48px;
+      }
       .hero-card {
         position: relative;
         overflow: hidden;
         border-radius: 32px;
-        padding: 26px 20px;
+        padding: 24px 18px;
         color: #fff;
         background:
           radial-gradient(circle at 18% 12%, rgb(255 255 255 / 0.24), transparent 26%),
@@ -45,96 +50,241 @@
         background: rgb(255 255 255 / 0.16);
         border: 1px solid rgb(255 255 255 / 0.22);
         padding: 8px 12px;
-        font-size: .78rem;
+        font-size: .76rem;
         font-weight: 850;
-        letter-spacing: .12em;
+        letter-spacing: .1em;
         text-transform: uppercase;
       }
-      .hero-type {
-        margin: 24px 0 12px;
-        font-size: clamp(2.25rem, 11vw, 5rem);
+      .hero-level {
+        display: block;
+        margin: 18px 0 4px;
+        font-size: clamp(2rem, 10vw, 3.4rem);
         line-height: 1;
         font-weight: 950;
+        letter-spacing: .06em;
       }
       .hero-title {
         display: block;
-        margin-top: 8px;
-        color: rgb(255 255 255 / 0.9);
-        font-size: clamp(1.4rem, 5vw, 2.6rem);
+        margin: 0 0 10px;
+        font-size: clamp(1.35rem, 5vw, 2rem);
         font-weight: 850;
+        line-height: 1.25;
+        color: rgb(255 255 255 / 0.95);
       }
-      .hero-subtitle {
+      .hero-score {
+        display: inline-flex;
+        margin: 0 0 14px;
+        border-radius: 999px;
+        padding: 8px 14px;
+        background: rgb(255 255 255 / 0.14);
+        border: 1px solid rgb(255 255 255 / 0.2);
+        font-size: .95rem;
+        font-weight: 800;
+      }
+      .hero-text {
+        margin: 0 0 10px;
         max-width: 720px;
-        margin: 0;
-        color: rgb(255 255 255 / 0.86);
-        font-size: 1.05rem;
+        color: rgb(255 255 255 / 0.9);
+        font-size: .98rem;
         line-height: 1.65;
       }
-      .content-grid {
+      .hero-text:last-child { margin-bottom: 0; }
+      .content-stack {
         display: grid;
-        gap: 16px;
-        margin-top: 18px;
+        gap: 14px;
+        margin-top: 16px;
       }
       .profile-card {
         background: #fff;
         border: 1px solid rgb(226 232 240 / 0.9);
         border-radius: 26px;
-        padding: 20px;
-        box-shadow: 0 18px 48px rgb(15 23 42 / 0.08);
+        padding: 18px 16px;
+        box-shadow: 0 16px 44px rgb(15 23 42 / 0.07);
       }
-      .profile-card h2 { margin: 0 0 14px; font-size: 1.25rem; line-height: 1.25; }
+      .profile-card h2 {
+        margin: 0 0 12px;
+        font-size: 1.18rem;
+        line-height: 1.3;
+      }
       .section-kicker {
         display: inline-flex;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
         color: #0f766e;
-        font-size: .78rem;
+        font-size: .74rem;
         font-weight: 850;
         letter-spacing: .08em;
         text-transform: uppercase;
       }
-      .text-list,
-      .chip-list {
+      .body-text {
+        margin: 0;
+        color: #334155;
+        font-size: .98rem;
+        line-height: 1.7;
+      }
+      .metric-row {
+        display: grid;
+        gap: 12px;
         margin: 0;
         padding: 0;
         list-style: none;
       }
-      .text-list li {
-        margin-top: 12px;
+      .metric-row li {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 18px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        font-weight: 750;
         color: #334155;
-        line-height: 1.7;
       }
-      .text-list li:first-child { margin-top: 0; }
-      .chip-list {
+      .metric-row strong { color: #0f172a; }
+      .highlight-card {
+        background: linear-gradient(135deg, #f0fdfa 0%, #eef2ff 100%);
+        border-color: #99f6e4;
+      }
+      .area-badge {
+        display: inline-flex;
+        margin-bottom: 10px;
+        border-radius: 999px;
+        padding: 8px 14px;
+        background: #ccfbf1;
+        color: #115e59;
+        font-size: .92rem;
+        font-weight: 850;
+      }
+      .fallback-note {
+        margin: 0 0 12px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        color: #9a3412;
+        font-size: .92rem;
+        font-weight: 700;
+        line-height: 1.55;
+      }
+      .chip-list,
+      .step-list,
+      .premium-list {
         display: grid;
         gap: 10px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
       }
-      .chip-list li {
-        border-radius: 20px;
+      .chip-list li,
+      .step-list li {
+        border-radius: 18px;
         padding: 14px 15px;
         background: #f8fafc;
         border: 1px solid #e2e8f0;
         color: #334155;
         font-weight: 700;
+        line-height: 1.5;
+      }
+      .step-list li {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+      }
+      .step-num {
+        flex-shrink: 0;
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #0f766e, #4f46e5);
+        color: #fff;
+        font-size: .82rem;
+        font-weight: 900;
+      }
+      .locked-card {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(135deg, #111827 0%, #134e4a 100%);
+        border: 0;
+        color: #fff;
+        box-shadow: 0 22px 60px rgb(15 23 42 / 0.22);
+      }
+      .locked-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgb(255 255 255 / 0.06);
+      }
+      .locked-content { position: relative; z-index: 1; }
+      .locked-card .section-kicker { color: rgb(153 246 228); }
+      .locked-card h2,
+      .locked-card p { color: #fff; }
+      .premium-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        border-radius: 14px;
+        padding: 11px 12px;
+        background: rgb(255 255 255 / 0.1);
+        border: 1px solid rgb(255 255 255 / 0.14);
+        color: rgb(255 255 255 / 0.94);
+        font-size: .92rem;
         line-height: 1.45;
       }
-      .highlight-card {
-        background: linear-gradient(135deg, #f0fdfa 0%, #eef2ff 100%);
-        border-color: #99f6e4;
+      .premium-list li::before {
+        content: "✦";
+        flex-shrink: 0;
+        color: #5eead4;
+        font-weight: 900;
       }
-      .score-grid {
+      .payment-message {
+        margin: 0;
+        color: rgb(255 255 255 / 0.9);
+        font-size: .95rem;
+        line-height: 1.6;
+      }
+      .cta-form { margin-top: 16px; }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        border: 0;
+        border-radius: 16px;
+        padding: 15px 18px;
+        text-decoration: none;
+        font-size: .98rem;
+        font-weight: 850;
+        cursor: pointer;
+        text-align: center;
+      }
+      .btn-premium {
+        background: #fff;
+        color: #0f766e;
+        box-shadow: 0 16px 36px rgb(0 0 0 / 0.2);
+      }
+      .btn-secondary {
+        background: #e2e8f0;
+        color: #475569;
+        font-weight: 750;
+        font-size: .92rem;
+        padding: 12px 16px;
+      }
+      .page-actions {
         display: grid;
         gap: 10px;
+        margin-top: 20px;
       }
-      .score-row {
-        display: grid;
-        gap: 8px;
-      }
+      .score-grid { display: grid; gap: 10px; }
+      .score-row { display: grid; gap: 8px; }
       .score-meta {
         display: flex;
         justify-content: space-between;
         gap: 12px;
         color: #334155;
         font-weight: 800;
+        font-size: .9rem;
       }
       .score-track {
         height: 10px;
@@ -147,111 +297,100 @@
         border-radius: inherit;
         background: linear-gradient(135deg, #0f766e, #4f46e5);
       }
-      .locked-card {
-        position: relative;
-        overflow: hidden;
-        background: linear-gradient(135deg, #111827 0%, #134e4a 100%);
-        border: 0;
-        color: #fff;
+      .text-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
       }
-      .locked-card::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: rgb(255 255 255 / 0.08);
-        backdrop-filter: blur(2px);
+      .text-list li {
+        margin-top: 10px;
+        color: #334155;
+        line-height: 1.65;
       }
-      .locked-content { position: relative; z-index: 1; }
-      .lock-badge {
-        display: inline-flex;
-        margin-bottom: 12px;
-        border-radius: 999px;
-        padding: 8px 12px;
-        background: rgb(255 255 255 / 0.14);
-        color: #fff;
-        font-weight: 850;
-      }
-      .locked-card h2,
-      .locked-card p { color: #fff; }
-      .locked-card .premium-price {
-        margin: 0 0 14px;
-        font-size: 1.2rem;
-        font-weight: 900;
-      }
-      .payment-message {
-        margin: 12px 0 0;
-        color: rgb(255 255 255 / 0.9);
-        font-weight: 800;
-      }
-      .locked-card .chip-list li {
-        background: rgb(255 255 255 / 0.12);
-        border-color: rgb(255 255 255 / 0.16);
-        color: rgb(255 255 255 / 0.92);
-      }
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        border: 0;
-        border-radius: 16px;
-        padding: 14px 18px;
-        text-decoration: none;
-        font-weight: 850;
-        cursor: pointer;
-      }
-      .btn-primary {
-        margin-top: 16px;
-        background: #fff;
-        color: #0f766e;
-        box-shadow: 0 16px 36px rgb(0 0 0 / 0.16);
-      }
-      .btn-secondary { background: #ccfbf1; color: #115e59; }
-      .page-actions {
-        display: grid;
-        gap: 10px;
-        margin-top: 18px;
-      }
+      .text-list li:first-child { margin-top: 0; }
       @media (min-width: 720px) {
-        .result-shell { padding: 42px 18px 64px; }
-        .hero-card { padding: 42px; }
-        .content-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .profile-card { padding: 26px; }
-        .profile-card-wide { grid-column: 1 / -1; }
+        .result-shell { padding: 36px 20px 64px; }
+        .hero-card { padding: 36px 32px; }
+        .profile-card { padding: 22px 20px; }
         .chip-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        .page-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       }
     </style>
   </head>
   <body>
     <main class="result-shell">
-      <section class="hero-card">
+      <section class="hero-card" aria-labelledby="hero-heading">
         <div class="hero-content">
           <span class="hero-label">Stress test natijangiz</span>
-          <h1 class="hero-type">
-            {{ result.level|upper }} <span class="hero-title">{{ level_title }}</span>
+          <h1 id="hero-heading">
+            <span class="hero-level">{{ result.level|upper }}</span>
+            <span class="hero-title">{{ level_profile.title }}</span>
           </h1>
-          <p class="hero-subtitle">{{ result.explanation }}</p>
+          <span class="hero-score">{{ result.total_score }}/{{ max_score }} ball</span>
+          {% for paragraph in hero_paragraphs %}
+          <p class="hero-text">{{ paragraph }}</p>
+          {% endfor %}
         </div>
       </section>
 
-      <div class="content-grid">
-        <section class="profile-card highlight-card" aria-labelledby="score-title">
+      <div class="content-stack">
+        <section class="profile-card highlight-card" aria-labelledby="overview-title">
           <span class="section-kicker">Umumiy ko‘rsatkich</span>
-          <h2 id="score-title">{{ result.total_score }}/30 ball</h2>
-          <p class="hero-subtitle" style="color: #334155;">Eng kuchli yo‘nalish: <strong>{{ dimension_label }}</strong></p>
+          <h2 id="overview-title">Natijangiz qisqacha</h2>
+          <ul class="metric-row">
+            <li><span>Ball</span><strong>{{ result.total_score }}/{{ max_score }}</strong></li>
+            <li><span>Asosiy yo‘nalish</span><strong>{{ strongest_area_title }}</strong></li>
+            <li><span>Daraja</span><strong>{{ level_profile.title }}</strong></li>
+          </ul>
+          <p class="body-text" style="margin-top: 14px;">{{ overview_summary }}</p>
         </section>
 
-        {% if is_premium %}
-        <section class="profile-card highlight-card profile-card-wide" aria-labelledby="premium-summary-title">
+        <section class="profile-card" aria-labelledby="area-title">
+          <span class="section-kicker">Shaxsiy tahlil</span>
+          <h2 id="area-title">Sizda stress ko‘proq qayerda ko‘rinmoqda?</h2>
+          {% if not area_found %}
+          <p class="fallback-note">{{ area_profile.explanation }}</p>
+          <p class="body-text">
+            Quyidagi belgilar va tavsiyalar umumiy yo‘riqnoma sifatida foydali bo‘lishi mumkin.
+          </p>
+          {% else %}
+          <span class="area-badge">{{ strongest_area_title }}</span>
+          <p class="body-text">{{ area_profile.explanation }}</p>
+          {% endif %}
+        </section>
+
+        <section class="profile-card" aria-labelledby="signs-title">
+          <span class="section-kicker">Belgilar</span>
+          <h2 id="signs-title">Sizda ko‘rinayotgan ehtimoliy belgilar</h2>
+          <ul class="chip-list">
+            {% for item in area_profile.signs %}
+            <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </section>
+
+        <section class="profile-card highlight-card" aria-labelledby="steps-title">
+          <span class="section-kicker">Amaliy qadam</span>
+          <h2 id="steps-title">Bugundan boshlash mumkin bo‘lgan 3 qadam</h2>
+          <ol class="step-list">
+            {% for item in area_profile.advice %}
+            <li>
+              <span class="step-num">{{ loop.index }}</span>
+              <span>{{ item }}</span>
+            </li>
+            {% endfor %}
+          </ol>
+        </section>
+
+        {% if is_premium and premium %}
+        <section class="profile-card highlight-card" aria-labelledby="premium-summary-title">
           <span class="section-kicker">Premium tahlil</span>
           <h2 id="premium-summary-title">Stress holatingizning chuqurroq talqini</h2>
-          <p class="hero-subtitle" style="color: #334155;">{{ premium.summary if premium else result.explanation }}</p>
-          <p class="hero-subtitle" style="color: #334155;"><strong>{{ premium.score_label if premium else level_title }}</strong></p>
+          <p class="body-text">{{ premium.summary }}</p>
+          <p class="body-text" style="margin-top: 10px;"><strong>{{ premium.score_label }}</strong></p>
         </section>
 
         <section class="profile-card" aria-labelledby="dimension-title">
-          <span class="section-kicker">Yo‘nalishlar</span>
+          <span class="section-kicker">5 yo‘nalish</span>
           <h2 id="dimension-title">Stress qayerda ko‘proq yig‘ilgan?</h2>
           <div class="score-grid">
             {% for key, label in dimension_labels.items() %}
@@ -269,84 +408,75 @@
           </div>
         </section>
 
-        <section class="profile-card" aria-labelledby="signs-title">
-          <span class="section-kicker">Belgilar</span>
-          <h2 id="signs-title">Tanangiz va hislaringiz nimani bildirishi mumkin?</h2>
-          <ul class="chip-list">
-            {% if premium %}
-            {% for item in premium.weak_sides %}
-            <li>{{ item }}</li>
-            {% endfor %}
-            {% else %}
-            <li>Charchoq, diqqat pasayishi yoki kayfiyat tebranishlari stress signali bo‘lishi mumkin.</li>
-            {% endif %}
-          </ul>
-        </section>
-
-        <section class="profile-card profile-card-wide" aria-labelledby="risk-title">
+        <section class="profile-card" aria-labelledby="premium-risk-title">
           <span class="section-kicker">Asosiy manba</span>
-          <h2 id="risk-title">Stressning eng muhim bosim nuqtasi</h2>
-          <p class="hero-subtitle" style="color: #334155;">{{ premium.main_risk if premium else "Stress manbasini aniqlash tiklanish uchun birinchi qadam." }}</p>
+          <h2 id="premium-risk-title">Stressning eng muhim bosim nuqtasi</h2>
+          <p class="body-text">{{ premium.main_risk }}</p>
         </section>
 
-        <section class="profile-card profile-card-wide" aria-labelledby="advice-title">
-          <span class="section-kicker">Tiklanish tavsiyalari</span>
-          <h2 id="advice-title">Bugundan boshlash mumkin bo‘lgan qadamlar</h2>
+        <section class="profile-card" aria-labelledby="premium-advice-title">
+          <span class="section-kicker">Shaxsiy tavsiyalar</span>
+          <h2 id="premium-advice-title">Sizga mos qo‘shimcha tavsiyalar</h2>
           <ul class="chip-list">
-            {% if premium %}
             {% for item in premium.recommendations %}
             <li>{{ item }}</li>
             {% endfor %}
-            {% else %}
-            {% for item in recommendations %}
-            <li>{{ item }}</li>
-            {% endfor %}
-            {% endif %}
           </ul>
         </section>
 
-        <section class="profile-card profile-card-wide" aria-labelledby="plan-title">
+        <section class="profile-card" aria-labelledby="plan-title">
           <span class="section-kicker">7 kunlik reja</span>
-          <h2 id="plan-title">Stressni kamaytirish uchun yumshoq reja</h2>
+          <h2 id="plan-title">Stressni kamaytirish uchun tiklanish rejasi</h2>
           <ul class="text-list">
-            {% if premium %}
             {% for item in premium.seven_day_plan %}
             <li>{{ item }}</li>
             {% endfor %}
-            {% else %}
-            <li>Har kuni 10 daqiqa tiklanish tanaffusini odat qiling.</li>
-            {% endif %}
           </ul>
         </section>
 
-        <section class="profile-card highlight-card profile-card-wide" aria-labelledby="conclusion-title">
+        <section class="profile-card highlight-card" aria-labelledby="conclusion-title">
           <span class="section-kicker">Yakuniy xulosa</span>
           <h2 id="conclusion-title">Bu natija bilan qanday ishlash kerak?</h2>
-          <p class="hero-subtitle" style="color: #334155;">{{ premium.conclusion if premium else "Stress signallarini vaqtida sezish va kichik odatlar bilan tiklanish eng muhim qadamdir." }}</p>
+          <p class="body-text">{{ premium.conclusion }}</p>
         </section>
         {% endif %}
 
         {% if not is_premium %}
-        <section class="profile-card locked-card profile-card-wide" aria-labelledby="premium-title">
+        <section class="profile-card locked-card" aria-labelledby="premium-teaser-title">
           <div class="locked-content">
-            <h2 id="premium-title">{{ "⏳ Premium so‘rov kutilmoqda" if payment_status == "pending" else "🔒 Batafsil tahlil" }}</h2>
-            <p class="premium-price">Narxi: 25 000 so‘m</p>
+            <span class="section-kicker">Premium tahlil</span>
+            <h2 id="premium-teaser-title">
+              {% if payment_status == "pending" %}
+              ⏳ Premium so‘rov kutilmoqda
+              {% else %}
+              🔒 Batafsil stress tahlili
+              {% endif %}
+            </h2>
             <p class="payment-message">
               {% if payment_status == "pending" %}
-              So‘rovingiz bazaga saqlandi. Admin tasdiqlagandan so‘ng shu result token orqali premium tahlil ochiladi.
+              So‘rovingiz saqlandi. Admin tasdiqlagandan so‘ng shu sahifada to‘liq tahlil ochiladi.
               {% elif payment_status == "rejected" %}
-              Avvalgi so‘rov rad etilgan. Qayta so‘rov yuborishingiz yoki admin bilan bog‘lanishingiz mumkin.
+              Avvalgi so‘rov rad etilgan. Qayta so‘rov yuborishingiz mumkin.
               {% else %}
-              Premium tahlilni olish uchun so‘rov yuboring. Result token doimiy saqlanadi va admin tasdiqlagandan so‘ng premium tahlil shu sahifada ochiladi.
+              {{ premium_teaser_copy }}
               {% endif %}
             </p>
-            {% if payment_status == "pending" %}
-            <a class="btn btn-primary" href="/payment/pending/{{ token }}">So‘rov holatini ko‘rish</a>
-            {% else %}
-            <form method="post" action="/payment/request/{{ token }}">
-              <button class="btn btn-primary" type="submit">Premiumni so‘rash</button>
-            </form>
-            {% endif %}
+            <ul class="premium-list">
+              {% for item in premium_teaser_items %}
+              <li>{{ item }}</li>
+              {% endfor %}
+            </ul>
+            <div class="cta-form">
+              {% if payment_status == "pending" %}
+              <a class="btn btn-premium" href="/payment/pending/{{ token }}">So‘rov holatini ko‘rish</a>
+              {% else %}
+              <form method="post" action="/payment/request/{{ token }}">
+                <button class="btn btn-premium" type="submit">
+                  🔓 Batafsil stress tahlilni olish — 25 000 so‘m
+                </button>
+              </form>
+              {% endif %}
+            </div>
           </div>
         </section>
         {% endif %}
@@ -354,10 +484,10 @@
 
       <nav class="page-actions" aria-label="Sahifa amallari">
         {% if is_premium %}
-        <a class="btn btn-primary" href="/pdf/stress/{{ token }}">PDF yuklab olish</a>
+        <a class="btn btn-premium" href="/pdf/stress/{{ token }}">PDF yuklab olish</a>
         {% endif %}
-        <a class="btn btn-secondary" href="/">Bosh sahifaga qaytish</a>
         <a class="btn btn-secondary" href="/stress/start">Testni qayta topshirish</a>
+        <a class="btn btn-secondary" href="/">Bosh sahifaga qaytish</a>
       </nav>
     </main>
   </body>

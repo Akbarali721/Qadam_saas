@@ -5,6 +5,13 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session as DbSession
 
 from app import models
+from app.crud import (
+    LOVE_FUNNEL_ABANDONED_AFTER_MINUTES,
+    RELATIONSHIP_TYPES,
+    _count_session_answers,
+    _dropoff_question_index,
+    _effective_last_activity,
+)
 
 
 PRODUCT_SLUGS = ("love", "mbti", "stress")
@@ -25,6 +32,111 @@ class LatestEvent(TypedDict):
     event_type: str
     metadata_json: str
     created_at: datetime
+
+
+class RelationshipFunnelStats(TypedDict):
+    relationship_type: str
+    total_started: int
+    total_in_progress: int
+    total_completed: int
+    total_abandoned: int
+    completion_rate: float
+    dropoff_rate: float
+
+
+class DropoffByQuestionIndex(TypedDict):
+    question_index: int
+    count: int
+
+
+class LoveTestFunnelStats(TypedDict):
+    total_started: int
+    total_in_progress: int
+    total_completed: int
+    total_abandoned: int
+    completion_rate: float
+    dropoff_rate: float
+    average_answered_questions: float
+    dropoff_by_question_index: list[DropoffByQuestionIndex]
+    by_relationship_type: list[RelationshipFunnelStats]
+
+
+def _empty_relationship_bucket(relationship_type: str) -> RelationshipFunnelStats:
+    return {
+        "relationship_type": relationship_type,
+        "total_started": 0,
+        "total_in_progress": 0,
+        "total_completed": 0,
+        "total_abandoned": 0,
+        "completion_rate": 0.0,
+        "dropoff_rate": 0.0,
+    }
+
+
+def _rate(part: int, total: int) -> float:
+    if total == 0:
+        return 0.0
+    return round((part / total) * 100, 1)
+
+
+def get_love_test_funnel_stats(db: DbSession) -> LoveTestFunnelStats:
+    cutoff = datetime.utcnow() - timedelta(minutes=LOVE_FUNNEL_ABANDONED_AFTER_MINUTES)
+    sessions = db.execute(select(models.Session)).scalars().all()
+
+    total_started = len(sessions)
+    total_in_progress = 0
+    total_completed = 0
+    total_abandoned = 0
+    answered_questions_total = 0
+    dropoff_counts: dict[int, int] = {}
+    by_relationship: dict[str, RelationshipFunnelStats] = {
+        relationship_type: _empty_relationship_bucket(relationship_type)
+        for relationship_type in RELATIONSHIP_TYPES
+    }
+
+    for session in sessions:
+        relationship_type = session.relationship_type if session.relationship_type in RELATIONSHIP_TYPES else "married"
+        bucket = by_relationship[relationship_type]
+        bucket["total_started"] += 1
+        answered_questions_total += _count_session_answers(session)
+
+        if session.status == "completed":
+            total_completed += 1
+            bucket["total_completed"] += 1
+            continue
+
+        last_activity = _effective_last_activity(session)
+        if last_activity >= cutoff:
+            total_in_progress += 1
+            bucket["total_in_progress"] += 1
+        else:
+            total_abandoned += 1
+            bucket["total_abandoned"] += 1
+            dropoff_index = _dropoff_question_index(session)
+            dropoff_counts[dropoff_index] = dropoff_counts.get(dropoff_index, 0) + 1
+
+    for bucket in by_relationship.values():
+        started = bucket["total_started"]
+        bucket["completion_rate"] = _rate(bucket["total_completed"], started)
+        bucket["dropoff_rate"] = _rate(bucket["total_abandoned"], started)
+
+    return {
+        "total_started": total_started,
+        "total_in_progress": total_in_progress,
+        "total_completed": total_completed,
+        "total_abandoned": total_abandoned,
+        "completion_rate": _rate(total_completed, total_started),
+        "dropoff_rate": _rate(total_abandoned, total_started),
+        "average_answered_questions": round(
+            answered_questions_total / total_started,
+            2,
+        ) if total_started else 0.0,
+        "dropoff_by_question_index": [
+            {"question_index": question_index, "count": count}
+            for question_index, count in sorted(dropoff_counts.items())
+        ],
+        "by_relationship_type": [by_relationship[relationship_type] for relationship_type in RELATIONSHIP_TYPES],
+    }
 
 
 def _today_window() -> tuple[datetime, datetime]:

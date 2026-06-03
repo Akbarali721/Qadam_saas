@@ -84,16 +84,19 @@ function initIndexTelegramId() {
 }
 
 function dimensionLabel(key) {
+  if (window.LoveDimensionInsights) {
+    return LoveDimensionInsights.dimensionLabel(key);
+  }
   const map = {
     communication: "Muloqot",
     trust: "Ishonch",
-    attention: "E'tibor",
+    attention: "E’tibor",
     emotional_closeness: "Hissiy yaqinlik",
   };
   return map[key] || key;
 }
 
-const DIMENSION_TEASER_ORDER = [
+const DIMENSION_TEASER_ORDER = window.LoveDimensionInsights?.order || [
   "communication",
   "trust",
   "attention",
@@ -120,34 +123,102 @@ function emotionalSummaryFromOverall(percent) {
   return "Sizlar orasida juda yaxshi moslik bor. Bu mustahkam munosabat uchun kuchli asos.";
 }
 
-function dimensionTeaserLine(dimensionKey, score) {
-  const n = Number(score);
-  const s = Number.isNaN(n) ? 0 : n;
-  const tier = s >= 70 ? "high" : s >= 45 ? "mid" : "low";
-  const lines = {
-    communication: {
-      high: "Muloqotingiz yaxshi yo‘lga qo‘yilgan, bir-biringizni eshitish oson.",
-      mid: "Muloqot o‘rtacha: ba’zi vaziyatlarda tushunmovchilik seziladi.",
-      low: "Muloqotda muammo bor: hislarni ochiq aytish va tinglash ustida ishlash kerak.",
-    },
-    trust: {
-      high: "Ishonch darajasi yaxshi, munosabatda tayanch hissi bor.",
-      mid: "Ishonch o‘rtacha: barqarorlik va aniq kelishuvlar foyda beradi.",
-      low: "Ishonch bo‘yicha muammo bor, kichik va izchil qadamlar bilan tiklash kerak.",
-    },
-    attention: {
-      high: "E’tibor darajasi yaxshi: bir-biringizga vaqt va diqqat ajratyapsiz.",
-      mid: "E’tibor o‘rtacha: kundalik shoshilishda bu jihat ba’zan pasayadi.",
-      low: "E’tibor bo‘yicha muammo bor: sifatli vaqt va g‘amxo‘rlikni ko‘paytirish zarur.",
-    },
-    emotional_closeness: {
-      high: "Hissiy yaqinlik yaxshi: samimiylik va iliqlik seziladi.",
-      mid: "Hissiy yaqinlik o‘rtacha: chuqur mavzularni ko‘proq ochish kerak bo‘lishi mumkin.",
-      low: "Hissiy yaqinlikda muammo bor: xavfsiz va samimiy suhbatlarni ko‘paytirish muhim.",
-    },
-  };
-  const dimLines = lines[dimensionKey] || lines.communication;
-  return dimLines[tier];
+function buildDimensionTeaserCard(dimensionKey, scoreNum) {
+  const insight = window.LoveDimensionInsights
+    ? LoveDimensionInsights.getDimensionInsight(dimensionKey, scoreNum)
+    : {
+        label: dimensionLabel(dimensionKey),
+        score: scoreNum,
+        statusLabel: "—",
+        explanation: "",
+        recommendation: "",
+        tier: "mid",
+      };
+
+  const card = document.createElement("article");
+  card.className = `teaser-card teaser-card--${insight.tier}`;
+
+  const header = document.createElement("div");
+  header.className = "teaser-card__header";
+
+  const title = document.createElement("h3");
+  title.className = "teaser-title";
+  title.textContent = insight.label;
+
+  const status = document.createElement("span");
+  status.className = `teaser-status teaser-status--${insight.tier}`;
+  status.textContent = insight.statusLabel;
+
+  header.appendChild(title);
+  header.appendChild(status);
+
+  const pct = document.createElement("p");
+  pct.className = "teaser-pct";
+  pct.textContent = `${Number.isFinite(insight.score) ? insight.score : 0}%`;
+
+  const explanation = document.createElement("p");
+  explanation.className = "teaser-explanation";
+  explanation.textContent = insight.explanation;
+
+  const recLabel = document.createElement("p");
+  recLabel.className = "teaser-rec-label";
+  recLabel.textContent = "Tavsiya";
+
+  const recommendation = document.createElement("p");
+  recommendation.className = "teaser-recommendation";
+  recommendation.textContent = insight.recommendation;
+
+  card.appendChild(header);
+  card.appendChild(pct);
+  card.appendChild(explanation);
+  card.appendChild(recLabel);
+  card.appendChild(recommendation);
+  return card;
+}
+
+function renderDifferencesBlock(dimensionScores) {
+  const differencesBlock = document.getElementById("differences-block");
+  const differencesText = document.getElementById("differences-text");
+  const differencesSubtext = document.getElementById("differences-subtext");
+  const differencesRec = document.getElementById("differences-rec");
+  if (!differencesBlock || !differencesText) {
+    return;
+  }
+
+  const content = window.LoveDimensionInsights
+    ? LoveDimensionInsights.buildDifferencesContent(dimensionScores)
+    : {
+        hasGaps: false,
+        text: (dimensionScores && "") || "",
+        subtext: "",
+        recommendation: "",
+      };
+
+  if (!content.text) {
+    differencesBlock.classList.add("hidden");
+    return;
+  }
+
+  differencesText.textContent = content.text;
+  if (differencesSubtext) {
+    if (content.hasGaps && content.subtext) {
+      differencesSubtext.textContent = content.subtext;
+      differencesSubtext.classList.remove("hidden");
+    } else {
+      differencesSubtext.textContent = "";
+      differencesSubtext.classList.add("hidden");
+    }
+  }
+  if (differencesRec) {
+    if (content.hasGaps && content.recommendation) {
+      differencesRec.textContent = content.recommendation;
+      differencesRec.classList.remove("hidden");
+    } else {
+      differencesRec.textContent = "";
+      differencesRec.classList.add("hidden");
+    }
+  }
+  differencesBlock.classList.remove("hidden");
 }
 
 function normalizeDimensionScores(rawScores) {
@@ -312,9 +383,31 @@ async function parseError(response) {
   return `So‘rov bajarilmadi (status: ${response.status})`;
 }
 
+function revealLoveProfileForm() {
+  const profileSection =
+    document.getElementById("profile-section") ||
+    document.getElementById("love-step-form");
+  if (!profileSection) {
+    return;
+  }
+
+  if (profileSection.classList.contains("hidden")) {
+    profileSection.classList.remove("hidden");
+  }
+  if (profileSection.hidden) {
+    profileSection.hidden = false;
+  }
+  profileSection.classList.add("love-step--visible");
+
+  requestAnimationFrame(() => {
+    profileSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById("initiator-name")?.focus({ preventScroll: true });
+  });
+}
+
 async function startTest() {
   setMessage("");
-  const button = document.getElementById("start-test-btn");
+  const button = document.getElementById("profile-submit-btn");
   const form = document.getElementById("initiator-form");
   if (form && !form.reportValidity()) {
     return;
@@ -332,8 +425,12 @@ async function startTest() {
     const zodiacEl = form?.querySelector(
       'input[name="initiator_zodiac"]:checked',
     );
+    const zodiacValue = zodiacEl ? zodiacEl.value.trim() : "";
     const relEl = form?.querySelector(
       'input[name="relationship_type"]:checked',
+    );
+    const relHidden = form?.querySelector(
+      'input[name="relationship_type"][type="hidden"]',
     );
     const telegramUserId = getTelegramUserId();
     const createSessionUrl = telegramUserId
@@ -346,8 +443,12 @@ async function startTest() {
         initiator_name: nameInput ? nameInput.value.trim() : "",
         initiator_age: ageInput ? Number(ageInput.value) : 0,
         initiator_gender: genderEl ? genderEl.value : "",
-        initiator_zodiac: zodiacEl ? zodiacEl.value : "",
-        relationship_type: relEl ? relEl.value : "married",
+        initiator_zodiac: zodiacValue || null,
+        relationship_type: relEl
+          ? relEl.value
+          : relHidden
+            ? relHidden.value
+            : "married",
         initiator_telegram_id: telegramUserId || null,
         creator_telegram_id: telegramUserId || null,
       }),
@@ -472,6 +573,23 @@ function showQuestion(index, total) {
   const pill = document.getElementById("quiz-progress-pill");
   if (pill && total) {
     pill.textContent = `${nextIndex + 1}/${total}`;
+  }
+  reportQuizProgress(nextIndex);
+}
+
+async function reportQuizProgress(questionIndex) {
+  const token = hydrateTokenFromUrl();
+  if (!token) {
+    return;
+  }
+  try {
+    await fetch(`/api/sessions/${encodeURIComponent(token)}/progress`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question_index: questionIndex }),
+    });
+  } catch (_error) {
+    // Progress tracking should not block the quiz flow.
   }
 }
 
@@ -627,6 +745,7 @@ async function loadQuestionsPage() {
       throw new Error("Savollar topilmadi. Iltimos, qaytadan urinib ko‘ring.");
     }
     renderQuestions(questions);
+    showQuestion(0, questions.length);
 
     const form = document.getElementById("questions-form");
     const progressWrap = document.getElementById("quiz-progress");
@@ -740,8 +859,6 @@ async function loadResultPage() {
     const emotionalLineEl = document.getElementById("emotional-line");
     const initiatorZodiacEl = document.getElementById("initiator-zodiac");
     const partnerZodiacEl = document.getElementById("partner-zodiac");
-    const differencesBlock = document.getElementById("differences-block");
-    const differencesText = document.getElementById("differences-text");
     const zodiacSummaryEl = document.getElementById("zodiac-summary");
     const dimensionTeasersEl = document.getElementById("dimension-teasers");
     const zodiacBlockEl = document.getElementById("zodiac-block");
@@ -755,42 +872,23 @@ async function loadResultPage() {
         result.total_score,
       );
     }
+    const scores = normalizeDimensionScores(result.dimension_scores || {});
     if (dimensionTeasersEl) {
       dimensionTeasersEl.innerHTML = "";
-      const scores = normalizeDimensionScores(result.dimension_scores || {});
-      DIMENSION_TEASER_ORDER.forEach((dimension) => {
+      const order = window.LoveDimensionInsights?.order || DIMENSION_TEASER_ORDER;
+      order.forEach((dimension) => {
         const raw = scores[dimension];
         const scoreNum = typeof raw === "number" ? raw : 0;
-        const card = document.createElement("article");
-        card.className = "teaser-card";
-        const title = document.createElement("h3");
-        title.className = "teaser-title";
-        title.textContent = dimensionLabel(dimension);
-        const pct = document.createElement("p");
-        pct.className = "teaser-pct";
-        pct.textContent = `${Number.isFinite(scoreNum) ? scoreNum : 0}%`;
-        const body = document.createElement("p");
-        body.className = "teaser-body";
-        body.textContent = dimensionTeaserLine(
-          dimension,
-          Number.isFinite(scoreNum) ? scoreNum : 0,
+        dimensionTeasersEl.appendChild(
+          buildDimensionTeaserCard(
+            dimension,
+            Number.isFinite(scoreNum) ? scoreNum : 0,
+          ),
         );
-        card.appendChild(title);
-        card.appendChild(pct);
-        card.appendChild(body);
-        dimensionTeasersEl.appendChild(card);
       });
     }
     renderFullAnalysis(result);
-    if (differencesText && differencesBlock) {
-      const diff = (result.differences || "").trim();
-      if (diff) {
-        differencesText.textContent = diff;
-        differencesBlock.classList.remove("hidden");
-      } else {
-        differencesBlock.classList.add("hidden");
-      }
-    }
+    renderDifferencesBlock(scores);
     if (hasBothZodiacs(result)) {
       if (initiatorZodiacEl) {
         initiatorZodiacEl.textContent = result.initiator_zodiac || "";
@@ -844,6 +942,17 @@ function init() {
   const page = document.body.dataset.page;
   if (page === "index") {
     initIndexTelegramId();
+    const startBtn =
+      document.getElementById("start-test-btn") ||
+      document.getElementById("hero-start-btn");
+    const profileSection =
+      document.getElementById("profile-section") ||
+      document.getElementById("love-step-form");
+    if (startBtn && profileSection) {
+      startBtn.addEventListener("click", () => {
+        revealLoveProfileForm();
+      });
+    }
     const initiatorForm = document.getElementById("initiator-form");
     if (initiatorForm) {
       initiatorForm.addEventListener("submit", (event) => {

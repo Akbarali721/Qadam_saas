@@ -82,6 +82,39 @@ def _run_lightweight_migrations() -> None:
                     "NOT NULL DEFAULT FALSE",
                 ),
             )
+            connection.execute(
+                text(
+                    "ALTER TABLE sessions ADD COLUMN IF NOT EXISTS current_question_index INTEGER "
+                    "NOT NULL DEFAULT 0",
+                ),
+            )
+            connection.execute(
+                text("ALTER TABLE sessions ADD COLUMN IF NOT EXISTS started_at TIMESTAMP"),
+            )
+            connection.execute(
+                text("ALTER TABLE sessions ADD COLUMN IF NOT EXISTS completed_at TIMESTAMP"),
+            )
+            connection.execute(
+                text("ALTER TABLE sessions ADD COLUMN IF NOT EXISTS last_activity_at TIMESTAMP"),
+            )
+            connection.execute(
+                text("UPDATE sessions SET started_at = created_at WHERE started_at IS NULL"),
+            )
+            connection.execute(
+                text(
+                    "UPDATE sessions SET last_activity_at = COALESCE(answered_at, created_at) "
+                    "WHERE last_activity_at IS NULL",
+                ),
+            )
+            connection.execute(
+                text(
+                    "UPDATE sessions SET completed_at = answered_at "
+                    "WHERE completed_at IS NULL AND status = 'completed'",
+                ),
+            )
+            connection.execute(
+                text("UPDATE sessions SET status = 'started' WHERE status = 'created'"),
+            )
         return
 
     if engine.dialect.name != "sqlite":
@@ -225,6 +258,25 @@ def _run_lightweight_migrations() -> None:
                     "NOT NULL DEFAULT 0",
                 ),
             )
+        if "current_question_index" not in session_column_names:
+            connection.execute(
+                text(
+                    "ALTER TABLE sessions ADD COLUMN current_question_index INTEGER "
+                    "NOT NULL DEFAULT 0",
+                ),
+            )
+        if "started_at" not in session_column_names:
+            connection.execute(
+                text("ALTER TABLE sessions ADD COLUMN started_at DATETIME"),
+            )
+        if "completed_at" not in session_column_names:
+            connection.execute(
+                text("ALTER TABLE sessions ADD COLUMN completed_at DATETIME"),
+            )
+        if "last_activity_at" not in session_column_names:
+            connection.execute(
+                text("ALTER TABLE sessions ADD COLUMN last_activity_at DATETIME"),
+            )
         connection.execute(
             text(
                 "UPDATE sessions SET initiator_telegram_id = creator_telegram_id "
@@ -237,6 +289,20 @@ def _run_lightweight_migrations() -> None:
 
         connection.execute(text("UPDATE sessions SET status = 'created' WHERE status = 'new'"))
         connection.execute(text("UPDATE sessions SET status = 'completed' WHERE status = 'answered'"))
+        connection.execute(text("UPDATE sessions SET started_at = created_at WHERE started_at IS NULL"))
+        connection.execute(
+            text(
+                "UPDATE sessions SET last_activity_at = COALESCE(answered_at, created_at) "
+                "WHERE last_activity_at IS NULL",
+            ),
+        )
+        connection.execute(
+            text(
+                "UPDATE sessions SET completed_at = answered_at "
+                "WHERE completed_at IS NULL AND status = 'completed'",
+            ),
+        )
+        connection.execute(text("UPDATE sessions SET status = 'started' WHERE status = 'created'"))
         connection.execute(
             text(
                 "UPDATE sessions SET respondent_gender = CASE "

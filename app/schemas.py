@@ -7,7 +7,7 @@ class SessionCreate(BaseModel):
     initiator_name: str = Field(..., min_length=1, max_length=120)
     initiator_age: int = Field(..., ge=18, le=99)
     initiator_gender: str = Field(..., pattern="^(ayol|erkak)$")
-    initiator_zodiac: str = Field(..., max_length=40)
+    initiator_zodiac: str | None = Field(default=None, max_length=40)
     relationship_type: str = Field(
         ...,
         pattern="^(married|friends|dating)$",
@@ -124,6 +124,10 @@ class AnswerSubmitItem(BaseModel):
 class AnswerSubmitRequest(BaseModel):
     role: str = Field(..., pattern="^(initiator|partner)$")
     answers: list[AnswerSubmitItem] = Field(..., min_length=1)
+
+
+class SessionProgressUpdate(BaseModel):
+    question_index: int = Field(..., ge=0)
 
 
 class ResultRead(BaseModel):

@@ -201,7 +201,8 @@ def _get_mbti_report(db: Session, token: str) -> PremiumReport | None:
     result_type = session.result_type
     profile = get_mbti_profile(result_type)
     content = generate_mbti_result(result_type)
-    title = str(content.get("title") or profile.get("title") or "Shaxsiyat profili")
+    profile_title = (profile or {}).get("title_uz") or (profile or {}).get("title")
+    title = str(content.get("title") or profile_title or "Shaxsiyat profili")
     strengths = [str(item) for item in content.get("strengths", [])][:4]
     career = [str(item) for item in content.get("career", [])]
     weaknesses = [str(item) for item in content.get("weaknesses", [])][:4]

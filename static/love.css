@@ -120,17 +120,107 @@ body[data-page="result"] {
   background: var(--love-primary-soft);
 }
 
+.love-step--form[hidden] {
+  display: none !important;
+}
+
+.love-step--form.love-step--visible {
+  animation: love-form-in 0.35s ease;
+}
+
+@keyframes love-form-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .love-form-panel {
-  margin-top: 16px;
-  padding: 16px;
-  border: 1px solid var(--love-border);
-  border-radius: 24px;
-  background: #fff;
+  margin-top: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .love-form-title {
-  margin: 0 0 12px;
-  font-size: 18px;
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+
+.love-form-lead {
+  margin: 0 0 16px;
+  color: var(--love-muted);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.love-field-input {
+  min-height: 52px;
+  padding: 14px 16px;
+  font-size: 17px;
+}
+
+.love-body .choice-tile__body {
+  min-height: 52px;
+  padding: 12px 14px;
+}
+
+.love-zodiac-details {
+  margin-bottom: 14px;
+  border: 1px solid var(--love-border);
+  border-radius: 18px;
+  background: #fbfaff;
+}
+
+.love-zodiac-summary {
+  padding: 14px 16px;
+  cursor: pointer;
+  list-style: none;
+  font-weight: 800;
+  color: var(--love-ink);
+}
+
+.love-zodiac-summary::-webkit-details-marker {
+  display: none;
+}
+
+.love-zodiac-details[open] .love-zodiac-summary {
+  border-bottom: 1px solid var(--love-border);
+}
+
+.love-zodiac-details .field--flush {
+  margin: 0;
+  padding: 12px 12px 4px;
+}
+
+.love-how-heading {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--love-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.love-how--compact {
+  margin-top: 4px;
+}
+
+.love-how--compact .love-how-item {
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--love-ink);
+}
+
+.love-step--hero .love-actions {
+  margin-top: 20px;
+  margin-bottom: 0;
 }
 
 .love-how {
@@ -515,6 +605,18 @@ body[data-page="result"] .teaser-card {
 
 body[data-page="result"] .teaser-pct {
   color: var(--love-primary);
+}
+
+body[data-page="result"] .teaser-title {
+  color: var(--love-primary-dark);
+}
+
+body[data-page="result"] .teaser-rec-label {
+  color: var(--love-primary);
+}
+
+body[data-page="result"] .diff-panel {
+  border-radius: 20px;
 }
 
 body[data-page="result"] .premium-panel {

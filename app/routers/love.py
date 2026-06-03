@@ -248,6 +248,7 @@ def questions_page(request: Request, db: DbSession = Depends(get_db)):
     if token:
         session = crud.get_session_by_token(db=db, token=token)
         if session is not None:
+            crud.mark_session_quiz_started(db=db, session=session)
             questions_payload = [
                 schemas.QuestionRead.model_validate(question).model_dump()
                 for question in crud.get_session_questions(db=db, session=session)
@@ -420,7 +421,27 @@ def get_session_questions(
     session = crud.get_session_by_token(db=db, token=token)
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
+    crud.mark_session_quiz_started(db=db, session=session)
     return crud.get_session_questions(db=db, session=session)
+
+
+@router.post("/api/sessions/{token}/progress", tags=["sessions"])
+def update_session_progress(
+    token: str,
+    payload: schemas.SessionProgressUpdate,
+    db: DbSession = Depends(get_db),
+) -> dict[str, str]:
+    session = crud.get_session_by_token(db=db, token=token)
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    if session.status == "completed":
+        raise HTTPException(status_code=409, detail="Test allaqachon yakunlangan")
+    crud.update_session_quiz_progress(
+        db=db,
+        session=session,
+        question_index=payload.question_index,
+    )
+    return {"status": "ok"}
 
 
 @router.post("/api/sessions/{token}/answers", tags=["answers"])

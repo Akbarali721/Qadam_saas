@@ -38,31 +38,46 @@
         </p>
         <div id="dimension-teasers" class="teaser-grid"></div>
 
-        <section id="differences-block" class="diff-panel hidden" aria-labelledby="diff-heading">
+        <section id="differences-block" class="diff-panel" aria-labelledby="diff-heading">
           <h2 id="diff-heading" class="diff-heading">Muhim tafovutlar</h2>
           <p id="differences-text" class="diff-text"></p>
+          <p id="differences-subtext" class="diff-subtext hidden"></p>
+          <p id="differences-rec" class="diff-rec hidden"></p>
         </section>
 
         <section class="premium-panel" aria-labelledby="premium-heading">
           <h2 id="premium-heading" class="premium-heading">
-            {{ "⏳ Premium so‘rov kutilmoqda" if payment_status == "pending" else "🔒 Batafsil tahlil" }}
+            {{ "⏳ Premium so‘rov kutilmoqda" if payment_status == "pending" else "🔒 Professional psixologik tavsiyalar" }}
           </h2>
-          <p class="premium-modal__price">Narxi: 25 000 so‘m</p>
-          <p class="premium-sub">
-            {% if payment_status == "pending" %}
-            So‘rovingiz bazaga saqlandi. Admin tasdiqlagandan so‘ng shu result token orqali premium tahlil ochiladi.
-            {% elif payment_status == "rejected" %}
-            Avvalgi so‘rov rad etilgan. Qayta so‘rov yuborishingiz yoki admin bilan bog‘lanishingiz mumkin.
-            {% else %}
-            Premium tahlilni olish uchun so‘rov yuboring. Result token doimiy saqlanadi va admin tasdiqlagandan so‘ng premium tahlil shu sahifada ochiladi.
-            {% endif %}
-          </p>
           {% if payment_status == "pending" %}
+          <p class="premium-sub">
+            So‘rovingiz bazaga saqlandi. Admin tasdiqlagandan so‘ng shu result token orqali professional tavsiyalar ochiladi.
+          </p>
+          <p class="premium-modal__price">Narxi: 25 000 so‘m</p>
           <p class="premium-sub">Token: <strong>{{ token }}</strong></p>
           <a class="btn-premium" href="/payment/pending/{{ token }}">So‘rov holatini ko‘rish</a>
-          {% else %}
+          {% elif payment_status == "rejected" %}
+          <p class="premium-sub">
+            Avvalgi so‘rov rad etilgan. Qayta so‘rov yuborishingiz yoki admin bilan bog‘lanishingiz mumkin.
+          </p>
+          <p class="premium-modal__price">Narxi: 25 000 so‘m</p>
           <form method="post" action="/payment/request/{{ token }}">
-            <button class="btn-premium" type="submit">Premium natijani olish</button>
+            <button class="btn-premium" type="submit">Professional tavsiyalarni olish</button>
+          </form>
+          {% else %}
+          <p class="premium-sub">
+            Sizning natijangiz asosida munosabatdagi kuchli tomonlar, ehtimoliy muammolar va ularni yumshatish bo‘yicha amaliy tavsiyalar tayyorlanadi.
+          </p>
+          <ul class="premium-list">
+            <li>munosabatdagi asosiy kuchli jihatlar</li>
+            <li>ehtimoliy kelishmovchilik sabablari</li>
+            <li>muloqotni yaxshilash bo‘yicha tavsiyalar</li>
+            <li>hissiy yaqinlikni mustahkamlash yo‘llari</li>
+            <li>juftingiz bilan gaplashish uchun yumshoq savollar</li>
+          </ul>
+          <p class="premium-modal__price">Narxi: 25 000 so‘m</p>
+          <form method="post" action="/payment/request/{{ token }}">
+            <button class="btn-premium" type="submit">Professional tavsiyalarni olish</button>
           </form>
           {% endif %}
         </section>
@@ -179,6 +194,7 @@
       </div>
     </main>
 
+    <script src="/static/love_dimension_insights.js"></script>
     <script src="/static/app.js"></script>
   </body>
 </html>

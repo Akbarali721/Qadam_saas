@@ -12,60 +12,20 @@ from sqlalchemy.orm import selectinload
 from app import models
 from app.core.database import get_db
 from app.core.templates import templates
+from app.data.stress_result_profiles import (
+    DIMENSION_LABELS,
+    PREMIUM_TEASER_COPY,
+    PREMIUM_TEASER_ITEMS,
+    STRESS_LEVEL_PROFILES,
+    build_stress_result_view,
+    get_area_profile,
+)
 from app.seeds.stress_questions import STRESS_DIMENSIONS
 from app.services import pdf_service
 
 router = APIRouter(tags=["stress"])
 
 SESSION_QUESTION_COUNT = 10
-
-DIMENSION_LABELS = {
-    "emotional_pressure": "Hissiy bosim",
-    "sleep_energy": "Uyqu va energiya",
-    "work_pressure": "Ish/o‘qish bosimi",
-    "relationship_pressure": "Munosabatlar bosimi",
-    "overthinking": "Ortiqcha o‘ylash",
-}
-
-LEVEL_CONTENT = {
-    "low": {
-        "title": "Past stress",
-        "explanation": (
-            "Hozirgi javoblaringiz stress nisbatan boshqarilayotganini ko‘rsatadi. "
-            "Barqaror odatlaringizni saqlash va charchoq signallarini erta payqash foydali."
-        ),
-        "recommendations": [
-            "Kun davomida 10 daqiqalik sokin tanaffusni odatga aylantiring.",
-            "Uyqu, ovqatlanish va harakat ritmini buzmaslikka harakat qiling.",
-            "Kichik bezovtaliklarni yig‘ib yurmasdan, vaqtida yozib yoki gapirib oling.",
-        ],
-    },
-    "medium": {
-        "title": "O‘rtacha stress",
-        "explanation": (
-            "Javoblaringiz stress bir necha sohada sezila boshlaganini ko‘rsatadi. "
-            "Bu bosqichda yuklamani tartiblash va tiklanish vaqtini oldindan rejalash muhim."
-        ),
-        "recommendations": [
-            "Bugungi vazifalarni 3 ta eng muhim ishgacha qisqartirib ko‘ring.",
-            "Kechqurun ekran va ish mavzularidan kamida 30 daqiqa tanaffus qiling.",
-            "Bosim berayotgan mavzuni bitta ishonchli odam bilan aniq gaplashib oling.",
-        ],
-    },
-    "high": {
-        "title": "Yuqori stress",
-        "explanation": (
-            "Natija stress tanangiz, fikrlaringiz yoki munosabatlaringizga kuchli ta’sir qilayotganini "
-            "bildiradi. O‘zingizni ayblamasdan, yuklamani kamaytirish va yordam so‘rashni birinchi "
-            "qadam sifatida ko‘ring."
-        ),
-        "recommendations": [
-            "Bugun bajarilishi shart bo‘lmagan ishlarni keyinga suring yoki boshqalarga bo‘ling.",
-            "Nafasni sekinlashtirish, qisqa yurish yoki sokin joyda 15 daqiqa dam olishdan boshlang.",
-            "Agar bu holat davom etsa, yaqin inson yoki mutaxassis bilan gaplashishni kechiktirmang.",
-        ],
-    },
-}
 
 
 def _generate_token(db: DbSession) -> str:
@@ -202,15 +162,16 @@ def _calculate_and_store_result(db: DbSession, session: models.StressSession) ->
 
     level = _level_for_score(total_score)
     strongest_dimension = max(dimension_scores, key=lambda dimension: dimension_scores[dimension])
-    content = LEVEL_CONTENT[level]
+    level_profile = STRESS_LEVEL_PROFILES[level]
+    area_profile, _ = get_area_profile(strongest_dimension)
     result = models.StressResult(
         session_id=session.id,
         total_score=total_score,
         level=level,
         strongest_dimension=strongest_dimension,
         dimension_scores=json.dumps(dimension_scores, ensure_ascii=False, sort_keys=True),
-        explanation=content["explanation"],
-        recommendations=json.dumps(content["recommendations"], ensure_ascii=False),
+        explanation=level_profile["description"],
+        recommendations=json.dumps(area_profile["advice"], ensure_ascii=False),
     )
     session.finished_at = datetime.utcnow()
     db.add(result)
@@ -341,6 +302,8 @@ def stress_result_page(request: Request, session_token: str, db: DbSession = Dep
         report = pdf_service.build_premium_report(db=db, test_type="stress", token=session_token)
         premium = report.as_context() if report else None
 
+    result_view = build_stress_result_view(result)
+
     return templates.TemplateResponse(
         request=request,
         name="stress/result.html",
@@ -349,11 +312,18 @@ def stress_result_page(request: Request, session_token: str, db: DbSession = Dep
             "is_premium": session.is_premium,
             "payment_status": session.payment_status,
             "result": result,
-            "level_title": LEVEL_CONTENT[result.level]["title"],
-            "dimension_label": DIMENSION_LABELS.get(result.strongest_dimension, result.strongest_dimension),
+            "result_view": result_view,
+            "level_profile": result_view["level_profile"],
+            "area_profile": result_view["area_profile"],
+            "area_found": result_view["area_found"],
+            "max_score": result_view["max_score"],
+            "overview_summary": result_view["overview_summary"],
+            "hero_paragraphs": result_view["hero_paragraphs"],
+            "strongest_area_title": result_view["strongest_area_title"],
             "dimension_scores": result.dimension_scores_dict,
             "dimension_labels": DIMENSION_LABELS,
-            "recommendations": result.recommendations_list,
             "premium": premium,
+            "premium_teaser_items": PREMIUM_TEASER_ITEMS,
+            "premium_teaser_copy": PREMIUM_TEASER_COPY,
         },
     )

@@ -14,25 +14,10 @@ def build_advice(total_score: int) -> str:
     return "Har kuni kichik samimiy suhbatdan boshlang va tortishuv uchun sokin qoidalar kelishing."
 
 
-def _dimension_label_uz(key: str) -> str:
-    labels = {
-        "communication": "Muloqot",
-        "trust": "Ishonch",
-        "attention": "E'tibor",
-        "emotional_closeness": "Hissiy yaqinlik",
-    }
-    return labels.get(key, key)
-
-
 def build_differences_text(dimension_scores: dict[str, int]) -> str:
-    lowest_dims = sorted(dimension_scores, key=dimension_scores.get)[:2]
-    if not lowest_dims:
-        return "Asosiy yo‘nalishlar bo‘yicha ma'lumot tayyor."
-    dim_names = ", ".join(_dimension_label_uz(dim) for dim in lowest_dims)
-    return (
-        f"Asosiy e'tibor berish kerak bo‘lgan yo‘nalishlar: {dim_names}. "
-        "Shu mavzularda ochiq va tinch muloqot natijani yaxshilaydi."
-    )
+    from app.services.love_dimension_insights import build_differences_content
+
+    return build_differences_content(dimension_scores)["text"]
 
 
 def build_zodiac_summary(initiator_zodiac: str | None, partner_zodiac: str | None) -> str:

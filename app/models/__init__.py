@@ -53,12 +53,21 @@ class Session(Base):
         server_default="0",
     )
 
-    status: Mapped[str] = mapped_column(String(32), nullable=False, server_default="created")
+    status: Mapped[str] = mapped_column(String(32), nullable=False, server_default="started")
+    current_question_index: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(),
         server_default=func.now(),
         nullable=False,
     )
+    started_at: Mapped[datetime | None] = mapped_column(DateTime(), nullable=True)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(), nullable=True)
+    last_activity_at: Mapped[datetime | None] = mapped_column(DateTime(), nullable=True)
     answered_at: Mapped[datetime | None] = mapped_column(DateTime(), nullable=True)
 
     answers: Mapped[list["Answer"]] = relationship(

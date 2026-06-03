@@ -18,7 +18,7 @@
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       }
       .result-shell {
-        max-width: 980px;
+        max-width: 640px;
         margin: 0 auto;
         padding: 22px 14px 44px;
       }
@@ -51,100 +51,139 @@
         padding: 8px 12px;
         font-size: .78rem;
         font-weight: 800;
-        letter-spacing: .12em;
+        letter-spacing: .06em;
       }
-      .hero-type {
-        margin: 24px 0 12px;
-        font-size: clamp(2.25rem, 12vw, 5.4rem);
+      .hero-type-code {
+        margin: 20px 0 6px;
+        font-size: clamp(2.8rem, 14vw, 4.5rem);
         line-height: 1;
         font-weight: 950;
-        letter-spacing: .03em;
+        letter-spacing: .06em;
       }
       .hero-title {
         display: block;
-        margin-top: 8px;
-        color: rgb(255 255 255 / 0.9);
-        font-size: clamp(1.55rem, 6vw, 2.8rem);
+        margin: 0 0 14px;
+        color: rgb(255 255 255 / 0.95);
+        font-size: clamp(1.35rem, 5.5vw, 1.85rem);
         font-weight: 850;
-        letter-spacing: 0;
+        line-height: 1.25;
       }
       .hero-subtitle {
-        max-width: 720px;
         margin: 0;
-        color: rgb(255 255 255 / 0.86);
-        font-size: 1.05rem;
+        max-width: 100%;
+        color: rgb(255 255 255 / 0.88);
+        font-size: 1rem;
         line-height: 1.65;
       }
-      .content-grid {
+      .content-stack {
         display: grid;
-        gap: 16px;
-        margin-top: 18px;
+        gap: 14px;
+        margin-top: 16px;
       }
       .profile-card {
         background: #fff;
         border: 1px solid rgb(226 232 240 / 0.9);
-        border-radius: 26px;
-        padding: 20px;
-        box-shadow: 0 18px 48px rgb(15 23 42 / 0.08);
+        border-radius: 24px;
+        padding: 18px 16px;
+        box-shadow: 0 14px 40px rgb(15 23 42 / 0.07);
       }
       .profile-card h2 {
-        margin: 0 0 14px;
-        font-size: 1.25rem;
-        line-height: 1.25;
+        margin: 0 0 12px;
+        font-size: 1.15rem;
+        line-height: 1.3;
       }
       .section-kicker {
         display: inline-flex;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
         color: #4f46e5;
-        font-size: .78rem;
+        font-size: .74rem;
         font-weight: 800;
         letter-spacing: .08em;
         text-transform: uppercase;
       }
-      .text-list,
-      .soft-list {
+      .body-text {
         margin: 0;
-        padding: 0;
-        list-style: none;
-      }
-      .text-list li {
-        margin-top: 12px;
         color: #334155;
+        font-size: .98rem;
         line-height: 1.7;
       }
-      .text-list li:first-child { margin-top: 0; }
-      .chip-list {
+      .fallback-note {
+        margin: 0;
+        padding: 14px 16px;
+        border-radius: 18px;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        color: #9a3412;
+        font-weight: 650;
+        line-height: 1.55;
+      }
+      .letter-grid {
         display: grid;
         gap: 10px;
         margin: 0;
         padding: 0;
         list-style: none;
       }
-      .chip-list li,
-      .soft-list li {
-        border-radius: 20px;
+      .letter-item {
+        border-radius: 18px;
         padding: 14px 15px;
+        background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+        border: 1px solid #e2e8f0;
+      }
+      .letter-pair {
+        display: block;
+        margin-bottom: 4px;
+        color: #6366f1;
+        font-size: .72rem;
+        font-weight: 800;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+      }
+      .letter-label {
+        display: block;
+        margin-bottom: 6px;
+        color: #0f172a;
+        font-size: .95rem;
+        font-weight: 850;
+      }
+      .letter-text {
+        margin: 0;
+        color: #475569;
+        font-size: .92rem;
+        line-height: 1.55;
+      }
+      .chip-list {
+        display: grid;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .chip-list li {
+        border-radius: 16px;
+        padding: 12px 14px;
         background: #f8fafc;
         border: 1px solid #e2e8f0;
         color: #334155;
         font-weight: 700;
+        font-size: .94rem;
         line-height: 1.45;
       }
-      .soft-list {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
+      .chip-list.strength li {
+        background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%);
+        border-color: #c7d2fe;
       }
-      .soft-list li {
-        flex: 1 1 220px;
+      .chip-list.caution li {
         background: #fff7ed;
         border-color: #fed7aa;
         color: #9a3412;
         font-weight: 650;
       }
-      .split-card {
-        display: grid;
-        gap: 16px;
+      .chip-list.advice li {
+        background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+        border-color: #bbf7d0;
+        color: #166534;
+        font-weight: 650;
       }
       .highlight-card {
         background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%);
@@ -161,41 +200,44 @@
         content: "";
         position: absolute;
         inset: 0;
-        background: rgb(255 255 255 / 0.08);
-        backdrop-filter: blur(2px);
+        background: rgb(255 255 255 / 0.06);
       }
       .locked-content { position: relative; z-index: 1; }
-      .lock-badge {
-        display: inline-flex;
-        margin-bottom: 12px;
-        border-radius: 999px;
-        padding: 8px 12px;
-        background: rgb(255 255 255 / 0.14);
-        color: #fff;
-        font-weight: 800;
-      }
       .locked-card h2,
       .locked-card p { color: #fff; }
-      .locked-card .premium-price {
-        margin: 0 0 14px;
-        font-size: 1.2rem;
+      .locked-card .section-kicker { color: rgb(199 210 254); }
+      .premium-list {
+        display: grid;
+        gap: 8px;
+        margin: 14px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+      .premium-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        border-radius: 14px;
+        padding: 11px 12px;
+        background: rgb(255 255 255 / 0.1);
+        border: 1px solid rgb(255 255 255 / 0.14);
+        color: rgb(255 255 255 / 0.94);
+        font-size: .92rem;
+        line-height: 1.45;
+      }
+      .premium-list li::before {
+        content: "✦";
+        flex-shrink: 0;
+        color: #c4b5fd;
         font-weight: 900;
       }
       .payment-message {
-        margin: 12px 0 0;
-        color: rgb(255 255 255 / 0.9);
-        font-weight: 800;
+        margin: 10px 0 0;
+        color: rgb(255 255 255 / 0.88);
+        font-size: .92rem;
+        line-height: 1.55;
       }
-      .locked-card .chip-list li {
-        background: rgb(255 255 255 / 0.12);
-        border-color: rgb(255 255 255 / 0.16);
-        color: rgb(255 255 255 / 0.92);
-      }
-      .actions {
-        display: grid;
-        gap: 10px;
-        margin-top: 18px;
-      }
+      .cta-form { margin: 16px 0 0; }
       .btn {
         display: inline-flex;
         align-items: center;
@@ -203,15 +245,17 @@
         width: 100%;
         border: 0;
         border-radius: 16px;
-        padding: 14px 18px;
+        padding: 15px 18px;
         text-decoration: none;
+        font-size: .98rem;
         font-weight: 800;
         cursor: pointer;
+        text-align: center;
       }
-      .btn-primary {
+      .btn-premium {
         background: #fff;
         color: #4f46e5;
-        box-shadow: 0 16px 36px rgb(0 0 0 / 0.16);
+        box-shadow: 0 16px 36px rgb(0 0 0 / 0.2);
       }
       .btn-secondary {
         background: #eef2ff;
@@ -222,200 +266,213 @@
         gap: 10px;
         margin-top: 18px;
       }
+      .text-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .text-list li {
+        margin-top: 10px;
+        color: #334155;
+        line-height: 1.65;
+      }
+      .text-list li:first-child { margin-top: 0; }
       @media (min-width: 720px) {
-        .result-shell { padding: 42px 18px 64px; }
-        .hero-card { padding: 42px; }
-        .content-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .profile-card { padding: 26px; }
-        .profile-card-wide { grid-column: 1 / -1; }
-        .chip-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .split-card { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .actions,
-        .page-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .result-shell { max-width: 720px; padding: 36px 20px 56px; }
+        .hero-card { padding: 36px 32px; }
+        .profile-card { padding: 22px 20px; }
+        .letter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .chip-list.strength,
+        .chip-list.caution { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       }
     </style>
   </head>
   <body>
-    {% set content = result_content|default({}, true) %}
-    {% set title = content.title|default(profile.title|default("O‘ziga xos shaxsiyat", true), true) %}
-    {% set subtitle = content.subtitle|default("Bu natija sizning fikrlash, qaror qabul qilish va odamlar bilan munosabat uslubingizni ko‘rsatadi.", true) %}
-    {% set about = content.about|default([profile.short_description|default("Sizda o‘zingizga xos kuchli tomonlar bor.", true)], true) %}
-    {% set strengths = content.strengths|default(profile.strengths|default([], true), true) %}
-    {% set weaknesses = content.weaknesses|default(["Ba'zan kuchli tomonlaringiz haddan tashqari ishlatilganda charchoq paydo bo‘lishi mumkin."], true) %}
-    {% set relationship = content.relationship|default(["Munosabatda sizga hurmat, ishonch va samimiy muloqot muhim."], true) %}
-    {% set career = content.career|default(["Sizga kuchli tomonlaringizni ishlata oladigan va shaxsiy uslubingizga joy beradigan muhit mos keladi."], true) %}
-    {% set advice = content.advice|default(["O‘zingizga mos muhitni tanlashda ichki ehtiyojlaringizni ham hisobga oling."], true) %}
-
     <main class="result-shell">
-      <section class="hero-card">
+      <section class="hero-card" aria-labelledby="hero-heading">
         <div class="hero-content">
-          <span class="hero-label">MBTI NATIJANGIZ</span>
-          <h1 class="hero-type">
-            {{ result_type }} <span class="hero-title">{{ title }}</span>
+          <span class="hero-label">Sizning MBTI tipingiz</span>
+          <h1 id="hero-heading">
+            <span class="hero-type-code">{{ result_type }}</span>
+            {% if profile_found and mbti_profile %}
+            <span class="hero-title">{{ mbti_profile.title_uz }}</span>
+            {% endif %}
           </h1>
-          <p class="hero-subtitle">{{ subtitle }}</p>
+          {% if profile_found and mbti_profile %}
+          <p class="hero-subtitle">{{ mbti_profile.short_description }}</p>
+          {% else %}
+          <p class="hero-subtitle">
+            Sizning natijangiz tayyor, lekin bu tip uchun batafsil izoh hozircha qo‘shilmagan.
+          </p>
+          {% endif %}
         </div>
       </section>
 
-      <div class="content-grid">
-        <section class="profile-card profile-card-wide" aria-labelledby="about-title">
-          <span class="section-kicker">Siz haqingizda</span>
-          <h2 id="about-title">Bu natija sizni qanday tasvirlaydi?</h2>
-          <ul class="text-list">
-            {% for paragraph in about %}
-            <li>{{ paragraph }}</li>
+      <div class="content-stack">
+        {% if not profile_found %}
+        <section class="profile-card">
+          <p class="fallback-note">
+            Sizning natijangiz tayyor, lekin bu tip uchun batafsil izoh hozircha qo‘shilmagan.
+          </p>
+        </section>
+        {% else %}
+
+        {% if letter_breakdown %}
+        <section class="profile-card" aria-labelledby="letters-title">
+          <span class="section-kicker">4 harf nimani anglatadi?</span>
+          <h2 id="letters-title">Sizning javoblaringiz qanday yo‘nalishni ko‘rsatadi</h2>
+          <ul class="letter-grid">
+            {% for letter in letter_breakdown %}
+            <li class="letter-item">
+              <span class="letter-pair">{{ letter.pair }}</span>
+              <span class="letter-label">{{ letter.chosen_label }}</span>
+              <p class="letter-text">{{ letter.chosen_text }}</p>
+            </li>
             {% endfor %}
           </ul>
         </section>
+        {% endif %}
 
-        <section class="profile-card" aria-labelledby="strength-title">
+        <section class="profile-card" aria-labelledby="strengths-title">
           <span class="section-kicker">Kuchli tomonlar</span>
-          <h2 id="strength-title">Sizda tabiiy kuchli chiqadigan jihatlar</h2>
-          <ul class="chip-list">
-            {% for strength in strengths %}
-            <li>{{ strength }}</li>
-            {% else %}
-            <li>O‘zingizga xos kuchli fikrlash uslubi</li>
+          <h2 id="strengths-title">Sizning kuchli tomonlaringiz</h2>
+          <ul class="chip-list strength">
+            {% for item in mbti_profile.strengths %}
+            <li>{{ item }}</li>
             {% endfor %}
           </ul>
         </section>
 
-        <section class="profile-card" aria-labelledby="risk-title">
-          <span class="section-kicker">Ehtiyot bo‘ladigan joylar</span>
-          <h2 id="risk-title">Sizni charchatishi mumkin bo‘lgan holatlar</h2>
-          <ul class="soft-list">
-            {% for weakness in weaknesses %}
-            <li>{{ weakness }}</li>
+        <section class="profile-card" aria-labelledby="weaknesses-title">
+          <span class="section-kicker">Ehtiyot bo‘lish kerak</span>
+          <h2 id="weaknesses-title">Ehtiyot bo‘lish kerak bo‘lgan tomonlar</h2>
+          <ul class="chip-list caution">
+            {% for item in mbti_profile.weaknesses %}
+            <li>{{ item }}</li>
             {% endfor %}
           </ul>
         </section>
 
-        {% if is_premium %}
-        <section class="profile-card highlight-card profile-card-wide" aria-labelledby="premium-summary-title">
+        <section class="profile-card" aria-labelledby="work-title">
+          <span class="section-kicker">Ish va o‘qish</span>
+          <h2 id="work-title">Ish/o‘qishdagi uslubingiz</h2>
+          <p class="body-text">{{ mbti_profile.work_style }}</p>
+        </section>
+
+        <section class="profile-card" aria-labelledby="relationship-title">
+          <span class="section-kicker">Munosabatlar</span>
+          <h2 id="relationship-title">Munosabatdagi uslubingiz</h2>
+          <p class="body-text">{{ mbti_profile.relationship_style }}</p>
+        </section>
+
+        <section class="profile-card highlight-card" aria-labelledby="advice-title">
+          <span class="section-kicker">Amaliy qadam</span>
+          <h2 id="advice-title">Siz uchun mini tavsiya</h2>
+          <ul class="chip-list advice">
+            {% for item in mbti_profile.mini_advice %}
+            <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </section>
+
+        {% endif %}
+
+        {% if is_premium and premium %}
+        <section class="profile-card highlight-card" aria-labelledby="premium-summary-title">
           <span class="section-kicker">Premium tahlil</span>
           <h2 id="premium-summary-title">Shaxsiyat profilingizning chuqurroq talqini</h2>
-          <p class="hero-subtitle" style="color: #334155;">{{ premium.summary if premium else subtitle }}</p>
-          <p class="hero-subtitle" style="color: #334155;"><strong>{{ premium.score_label if premium else result_type }}</strong></p>
-        </section>
-
-        <section class="profile-card profile-card-wide" aria-labelledby="relationship-title">
-          <span class="section-kicker">Muloqot uslubi</span>
-          <h2 id="relationship-title">Odamlar bilan aloqada sizga nima muhim?</h2>
-          <ul class="text-list">
-            {% for item in relationship %}
-            <li>{{ item }}</li>
-            {% endfor %}
-          </ul>
-        </section>
-
-        <section class="profile-card profile-card-wide" aria-labelledby="career-title">
-          <span class="section-kicker">Ish va kasb</span>
-          <h2 id="career-title">Sizga qanday ish muhiti mos keladi?</h2>
-          <ul class="text-list">
-            {% for item in career %}
-            <li>{{ item }}</li>
-            {% endfor %}
-          </ul>
+          <p class="body-text">{{ premium.summary }}</p>
+          <p class="body-text" style="margin-top: 10px;"><strong>{{ premium.score_label }}</strong></p>
         </section>
 
         <section class="profile-card" aria-labelledby="premium-strength-title">
           <span class="section-kicker">Kuchli tomonlar</span>
           <h2 id="premium-strength-title">Sizni ajratib turadigan resurslar</h2>
-          <ul class="chip-list">
-            {% if premium %}
+          <ul class="chip-list strength">
             {% for item in premium.strong_sides %}
             <li>{{ item }}</li>
             {% endfor %}
-            {% else %}
-            {% for strength in strengths %}
-            <li>{{ strength }}</li>
-            {% endfor %}
-            {% endif %}
           </ul>
         </section>
 
         <section class="profile-card" aria-labelledby="premium-growth-title">
           <span class="section-kicker">O‘sish joylari</span>
           <h2 id="premium-growth-title">Ehtiyotkorlik bilan rivojlantiriladigan jihatlar</h2>
-          <ul class="soft-list">
-            {% if premium %}
+          <ul class="chip-list caution">
             {% for item in premium.weak_sides %}
             <li>{{ item }}</li>
             {% endfor %}
-            {% else %}
-            {% for weakness in weaknesses %}
-            <li>{{ weakness }}</li>
-            {% endfor %}
-            {% endif %}
           </ul>
         </section>
 
-        <section class="profile-card profile-card-wide" aria-labelledby="premium-risk-title">
+        <section class="profile-card" aria-labelledby="premium-risk-title">
           <span class="section-kicker">Asosiy risk</span>
           <h2 id="premium-risk-title">Qaysi holat sizni sekinlashtirishi mumkin?</h2>
-          <p class="hero-subtitle" style="color: #334155;">{{ premium.main_risk if premium else "Kuchli tomon haddan tashqari ishlatilsa, charchoq va tushunmovchilik paydo bo‘lishi mumkin." }}</p>
+          <p class="body-text">{{ premium.main_risk }}</p>
         </section>
 
-        <section class="profile-card highlight-card profile-card-wide" aria-labelledby="advice-title">
+        <section class="profile-card highlight-card" aria-labelledby="premium-rec-title">
           <span class="section-kicker">Amaliy tavsiyalar</span>
-          <h2 id="advice-title">Bugundan boshlash mumkin bo‘lgan qadamlar</h2>
-          <ul class="chip-list">
-            {% if premium %}
+          <h2 id="premium-rec-title">Bugundan boshlash mumkin bo‘lgan qadamlar</h2>
+          <ul class="chip-list advice">
             {% for item in premium.recommendations %}
             <li>{{ item }}</li>
             {% endfor %}
-            {% else %}
-            {% for item in advice %}
-            <li>{{ item }}</li>
-            {% endfor %}
-            {% endif %}
           </ul>
         </section>
 
-        <section class="profile-card profile-card-wide" aria-labelledby="plan-title">
+        <section class="profile-card" aria-labelledby="plan-title">
           <span class="section-kicker">7 kunlik reja</span>
-          <h2 id="plan-title">O‘zini rivojlantirish bo‘yicha kichik amaliy reja</h2>
+          <h2 id="plan-title">O‘zini rivojlantirish bo‘yicha amaliy reja</h2>
           <ul class="text-list">
-            {% if premium %}
             {% for item in premium.seven_day_plan %}
             <li>{{ item }}</li>
             {% endfor %}
-            {% else %}
-            <li>Har kuni bitta kuchli tomoningizni ongli ishlatib, kechqurun qisqa xulosa yozing.</li>
-            {% endif %}
           </ul>
         </section>
 
-        <section class="profile-card highlight-card profile-card-wide" aria-labelledby="conclusion-title">
+        <section class="profile-card highlight-card" aria-labelledby="conclusion-title">
           <span class="section-kicker">Yakuniy xulosa</span>
           <h2 id="conclusion-title">Natijadan qanday foydalanish kerak?</h2>
-          <p class="hero-subtitle" style="color: #334155;">{{ premium.conclusion if premium else "Bu natija o‘zingizni yaxshiroq tushunish va mos muhit tanlash uchun yo‘l xaritasi bo‘lib xizmat qiladi." }}</p>
+          <p class="body-text">{{ premium.conclusion }}</p>
         </section>
         {% endif %}
 
         {% if not is_premium %}
-        <section class="profile-card locked-card profile-card-wide" aria-labelledby="premium-title">
+        <section class="profile-card locked-card" aria-labelledby="premium-teaser-title">
           <div class="locked-content">
-            <h2 id="premium-title">{{ "⏳ Premium so‘rov kutilmoqda" if payment_status == "pending" else "🔒 Batafsil tahlil" }}</h2>
-            <p class="premium-price">Narxi: 25 000 so‘m</p>
+            <span class="section-kicker">Premium tahlil</span>
+            <h2 id="premium-teaser-title">
+              {% if payment_status == "pending" %}
+              ⏳ Premium so‘rov kutilmoqda
+              {% else %}
+              Premiumda nimalar ochiladi?
+              {% endif %}
+            </h2>
             <p class="payment-message">
               {% if payment_status == "pending" %}
-              So‘rovingiz bazaga saqlandi. Admin tasdiqlagandan so‘ng shu result token orqali premium tahlil ochiladi.
+              So‘rovingiz saqlandi. Admin tasdiqlagandan so‘ng shu sahifada to‘liq tahlil ochiladi.
               {% elif payment_status == "rejected" %}
-              Avvalgi so‘rov rad etilgan. Qayta so‘rov yuborishingiz yoki admin bilan bog‘lanishingiz mumkin.
+              Avvalgi so‘rov rad etilgan. Qayta so‘rov yuborishingiz mumkin.
               {% else %}
-              Premium tahlilni olish uchun so‘rov yuboring. Result token doimiy saqlanadi va admin tasdiqlagandan so‘ng premium tahlil shu sahifada ochiladi.
+              Bepul natija sizga asosiy yo‘nalishni beradi. Premium esa chuqurroq, shaxsiy va amaliy tahlilni ochadi.
               {% endif %}
             </p>
-            <div class="actions">
+            <ul class="premium-list">
+              {% for item in premium_teaser_items %}
+              <li>{{ item }}</li>
+              {% endfor %}
+            </ul>
+            <div class="cta-form">
               {% if payment_status == "pending" %}
-              <a class="btn btn-primary" href="/payment/pending/{{ token }}">So‘rov holatini ko‘rish</a>
+              <a class="btn btn-premium" href="/payment/pending/{{ token }}">So‘rov holatini ko‘rish</a>
               {% else %}
               <form method="post" action="/payment/request/{{ token }}">
-                <button class="btn btn-primary" type="submit">Premiumni so‘rash</button>
+                <button class="btn btn-premium" type="submit">
+                  🔓 To‘liq MBTI tahlilni olish — 25 000 so‘m
+                </button>
               </form>
               {% endif %}
-              <a class="btn btn-secondary" href="/mbti/start">Testni qayta topshirish</a>
             </div>
           </div>
         </section>
@@ -424,7 +481,7 @@
 
       <nav class="page-actions" aria-label="Sahifa amallari">
         {% if is_premium %}
-        <a class="btn btn-primary" href="/pdf/mbti/{{ token }}">PDF yuklab olish</a>
+        <a class="btn btn-premium" href="/pdf/mbti/{{ token }}">PDF yuklab olish</a>
         {% endif %}
         <a class="btn btn-secondary" href="/">Bosh sahifaga qaytish</a>
         <a class="btn btn-secondary" href="/mbti/start">Yana bir marta topshirish</a>

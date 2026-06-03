@@ -45,6 +45,7 @@ UZBEK_ZODIACS: tuple[str, ...] = (
 
 RELATIONSHIP_TYPES: tuple[str, ...] = ("married", "friends", "dating")
 SESSION_QUESTION_COUNT = question_seeds.SESSION_QUESTION_COUNT
+LOVE_FUNNEL_ABANDONED_AFTER_MINUTES = 30
 BALANCE_DIMENSIONS: tuple[str, ...] = (
     "communication",
     "trust",
@@ -119,6 +120,15 @@ def _validate_zodiac(zodiac: str) -> str:
     if normalized not in UZBEK_ZODIACS:
         raise ValueError("Invalid zodiac value")
     return normalized
+
+
+def _optional_zodiac(zodiac: str | None) -> str | None:
+    if zodiac is None:
+        return None
+    normalized = zodiac.strip()
+    if not normalized:
+        return None
+    return _validate_zodiac(normalized)
 
 
 def _derive_respondent_gender(initiator_gender: str) -> str:
@@ -262,6 +272,81 @@ def get_session_questions(db: Session, session: models.Session) -> list[models.Q
 logger = logging.getLogger(__name__)
 
 
+def _utcnow() -> datetime:
+    return datetime.utcnow()
+
+
+def _effective_last_activity(session: models.Session) -> datetime:
+    return session.last_activity_at or session.started_at or session.created_at
+
+
+def _count_session_answers(session: models.Session) -> int:
+    return len(_parse_answer_blob(session.answers_initiator)) + len(
+        _parse_answer_blob(session.answers_partner),
+    )
+
+
+def _dropoff_question_index(session: models.Session) -> int:
+    if session.current_question_index > 0:
+        return session.current_question_index
+    init_count = len(_parse_answer_blob(session.answers_initiator))
+    partner_count = len(_parse_answer_blob(session.answers_partner))
+    progress = max(init_count, partner_count)
+    return max(progress - 1, 0)
+
+
+def touch_session_activity(
+    session: models.Session,
+    *,
+    status: str | None = None,
+    question_index: int | None = None,
+) -> None:
+    now = _utcnow()
+    session.last_activity_at = now
+    if status is not None and session.status != "completed":
+        session.status = status
+    if question_index is not None:
+        session.current_question_index = max(question_index, 0)
+
+
+def mark_session_quiz_started(db: Session, session: models.Session) -> None:
+    if session.status == "completed":
+        return
+    now = _utcnow()
+    if session.started_at is None:
+        session.started_at = now
+    session.last_activity_at = now
+    if session.status in ("created", "started", "partner_started"):
+        session.status = "in_progress"
+    db.commit()
+    db.refresh(session)
+
+
+def update_session_quiz_progress(
+    db: Session,
+    session: models.Session,
+    *,
+    question_index: int,
+) -> None:
+    if session.status == "completed":
+        return
+    touch_session_activity(
+        session,
+        status="in_progress",
+        question_index=question_index,
+    )
+    db.commit()
+    db.refresh(session)
+
+
+def mark_session_completed(session: models.Session) -> None:
+    now = _utcnow()
+    session.status = "completed"
+    session.answered_at = now
+    session.completed_at = now
+    session.last_activity_at = now
+
+
 def create_session(db: Session, payload: schemas.SessionCreate) -> models.Session:
     relationship_type = _validate_relationship_type(payload.relationship_type)
     respondent_gender = _derive_respondent_gender(payload.initiator_gender)
@@ -277,6 +362,7 @@ def create_session(db: Session, payload: schemas.SessionCreate) -> models.Sessio
         creator_telegram_id = initiator_telegram_id
     if not initiator_telegram_id and creator_telegram_id:
         initiator_telegram_id = creator_telegram_id
+    now = _utcnow()
     db_obj = models.Session(
         token=_generate_unique_session_token(db),
         creator_telegram_id=creator_telegram_id,
@@ -284,10 +370,13 @@ def create_session(db: Session, payload: schemas.SessionCreate) -> models.Sessio
         initiator_name=payload.initiator_name.strip(),
         initiator_age=payload.initiator_age,
         initiator_gender=payload.initiator_gender,
-        initiator_zodiac=_validate_zodiac(payload.initiator_zodiac),
+        initiator_zodiac=_optional_zodiac(payload.initiator_zodiac),
         respondent_gender=respondent_gender,
         relationship_type=relationship_type,
-        status="created",
+        status="started",
+        started_at=now,
+        last_activity_at=now,
+        current_question_index=0,
         answers_initiator="{}",
         answers_partner="{}",
         questions_json=json.dumps(questions_ids),
@@ -320,8 +409,7 @@ def register_partner(
     z = _validate_zodiac(payload.partner_zodiac)
     session.partner_zodiac = z
     session.respondent_zodiac = z
-    if session.status in ("created", "partner_started"):
-        session.status = "in_progress"
+    touch_session_activity(session, status="in_progress")
     db.commit()
     db.refresh(session)
 
@@ -330,7 +418,8 @@ def set_partner_telegram_id(db: Session, *, session: models.Session, telegram_id
     normalized = telegram_id.strip()
     if normalized and not session.partner_telegram_id:
         session.partner_telegram_id = normalized
-        if session.status == "created":
+        touch_session_activity(session)
+        if session.status in ("created", "started"):
             session.status = "partner_started"
         db.commit()
         db.refresh(session)
@@ -432,8 +521,7 @@ def _try_finalize_pair_session(db: Session, session: models.Session, expected_co
             differences=payload["differences"],
         ),
     )
-    session.status = "completed"
-    session.answered_at = datetime.utcnow()
+    mark_session_completed(session)
 
 
 def ensure_result_for_session(db: Session, session: models.Session) -> models.Result | None:
@@ -458,8 +546,7 @@ def ensure_result_for_session(db: Session, session: models.Session) -> models.Re
         differences=payload["differences"],
     )
     db.add(result)
-    session.status = "completed"
-    session.answered_at = datetime.utcnow()
+    mark_session_completed(session)
     db.commit()
     db.refresh(session)
     return get_result_by_session_id(db=db, session_id=session.id)
@@ -782,6 +869,8 @@ def submit_session_answers(
         session.answers_initiator = blob
     else:
         session.answers_partner = blob
+
+    touch_session_activity(session, status="in_progress", question_index=n - 1)
 
     db.flush()
     _try_finalize_pair_session(db=db, session=session, expected_count=n)

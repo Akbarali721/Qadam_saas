@@ -8,7 +8,7 @@ from app.admin_auth import verify_admin_token
 from app.core.database import get_db
 from app.core.templates import templates
 from app.services import payment_service
-from app.services.stats_service import PRODUCT_SLUGS, get_product_stats
+from app.services.stats_service import PRODUCT_SLUGS, get_love_test_funnel_stats, get_product_stats
 
 router = APIRouter(tags=["admin-dashboard"])
 
@@ -22,6 +22,7 @@ def _admin_stats_context(db: DbSession) -> dict[str, object]:
     total_questions = db.execute(select(func.count(models.Question.id))).scalar_one() or 0
     return {
         "product_stats": product_stats,
+        "love_test_funnel": get_love_test_funnel_stats(db=db),
         "total_questions": int(total_questions),
         "total_sessions": love_stats["total_sessions"],
         "completed_sessions": love_stats["finished_sessions"],

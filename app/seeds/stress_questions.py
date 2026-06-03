@@ -186,6 +186,26 @@ STRESS_QUESTIONS: list[StressQuestionSeed] = [
 ]
 
 
+def _sync_stress_options(question, option_seeds: list[StressOptionSeed]) -> None:
+    """Update StressOption rows in place; never delete options (user answers may reference them)."""
+    from app import models
+
+    by_score = {option.score: option for option in question.options}
+    for option_data in option_seeds:
+        score = option_data["score"]
+        existing_option = by_score.get(score)
+        if existing_option is None:
+            question.options.append(
+                models.StressOption(
+                    text=option_data["text"],
+                    score=score,
+                ),
+            )
+        else:
+            existing_option.text = option_data["text"]
+            existing_option.score = score
+
+
 def ensure_stress_questions_seeded(db) -> None:
     from sqlalchemy import select
     from sqlalchemy.orm import selectinload
@@ -213,31 +233,21 @@ def ensure_stress_questions_seeded(db) -> None:
                 dimension=question_data["dimension"],
                 is_active=True,
             )
-            db.add(question)
-            db.flush()
             for option_data in question_data["options"]:
-                db.add(
+                question.options.append(
                     models.StressOption(
-                        question_id=question.id,
                         text=option_data["text"],
                         score=option_data["score"],
                     ),
                 )
+            db.add(question)
             continue
 
         existing.dimension = question_data["dimension"]
         existing.is_active = True
-        existing.options.clear()
-        db.flush()
-        for option_data in question_data["options"]:
-            db.add(
-                models.StressOption(
-                    question_id=existing.id,
-                    text=option_data["text"],
-                    score=option_data["score"],
-                ),
-            )
+        _sync_stress_options(existing, question_data["options"])
 
+    db.flush()
     db.commit()
 
 

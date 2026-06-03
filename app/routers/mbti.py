@@ -13,7 +13,12 @@ from app import models
 from app.core.database import get_db
 from app.core.templates import templates
 from app.services import pdf_service
-from app.services.mbti_profiles import generate_mbti_result, get_mbti_profile
+from app.services.mbti_profiles import (
+    PREMIUM_TEASER_ITEMS,
+    generate_mbti_result,
+    get_mbti_letter_breakdown,
+    get_mbti_profile,
+)
 
 router = APIRouter(tags=["mbti"])
 
@@ -254,6 +259,7 @@ def mbti_result_page(request: Request, token: str, db: DbSession = Depends(get_d
     if not session.result_type:
         return RedirectResponse(url=f"/mbti/question/{token}", status_code=303)
     result_type = session.result_type
+    mbti_profile = get_mbti_profile(result_type)
     premium = None
     if session.is_premium:
         report = pdf_service.build_premium_report(db=db, test_type="mbti", token=token)
@@ -266,7 +272,10 @@ def mbti_result_page(request: Request, token: str, db: DbSession = Depends(get_d
             "is_premium": session.is_premium,
             "payment_status": session.payment_status,
             "result_type": result_type,
-            "profile": get_mbti_profile(result_type),
+            "mbti_profile": mbti_profile,
+            "profile_found": mbti_profile is not None,
+            "letter_breakdown": get_mbti_letter_breakdown(result_type),
+            "premium_teaser_items": PREMIUM_TEASER_ITEMS,
             "result_content": generate_mbti_result(result_type),
             "premium": premium,
         },
