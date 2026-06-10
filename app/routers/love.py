@@ -8,7 +8,8 @@ from sqlalchemy.orm import Session as DbSession
 from app import crud, models, schemas
 from app.core.database import SessionLocal, get_db
 from app.core.templates import templates
-from app.services import pdf_service
+from app.services import pdf_service, telegram_service
+from app.services.product_events_service import record_love_product_event
 from app.services.telegram_notify import (
     notify_love_user1_premium_unlocked,
     notify_user1_test_completed,
@@ -18,6 +19,8 @@ from app.services.telegram_notify import (
 
 router = APIRouter(tags=["love"])
 logger = logging.getLogger(__name__)
+
+LOVE_INVITE_SHARE_TEXT = "Munosabat testini birga ishlab ko‘raylik 💞"
 
 
 def _apply_tg_id_to_session_create(
@@ -166,6 +169,14 @@ def share_page(request: Request, token: str, db: DbSession = Depends(get_db)):
     )
     share_page_url = f"{public_base}/share/{token}"
     partner_start_url = f"{public_base}/start/{token}"
+    bot_invite_link = telegram_service.relationship_invite_deep_link(
+        token=token,
+        fallback_url=partner_start_url,
+    )
+    telegram_share_url = telegram_service.telegram_share_url(
+        url=bot_invite_link,
+        text=LOVE_INVITE_SHARE_TEXT,
+    )
     return templates.TemplateResponse(
         request=request,
         name="love/share.html",
@@ -174,6 +185,9 @@ def share_page(request: Request, token: str, db: DbSession = Depends(get_db)):
             "initiator_name": session.initiator_name,
             "share_page_url": share_page_url,
             "partner_start_url": partner_start_url,
+            "bot_invite_link": bot_invite_link,
+            "telegram_share_url": telegram_share_url,
+            "share_text": LOVE_INVITE_SHARE_TEXT,
             "initiator_questions_url": f"{public_base}/questions.html?token={token}&role=initiator",
         },
     )
@@ -318,6 +332,12 @@ def create_session(
         payload.initiator_telegram_id,
     )
     session = crud.create_session(db=db, payload=payload)
+    record_love_product_event(
+        db,
+        session_token=session.token,
+        event_type="invite_created",
+        metadata={"source": "love_create_session"},
+    )
     logger.info(
         "Session created token=%s creator_telegram_id=%s initiator_telegram_id=%s",
         session.token,
@@ -516,6 +536,20 @@ def submit_answers(
         )
 
     return {"status": "completed" if completed else "partial"}
+
+
+@router.post("/api/sessions/{token}/events/invite-share", tags=["sessions"])
+def track_invite_share_clicked(token: str, db: DbSession = Depends(get_db)) -> dict[str, bool]:
+    session = crud.get_session_by_token(db=db, token=token)
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    recorded = record_love_product_event(
+        db,
+        session_token=token,
+        event_type="invite_share_clicked",
+        metadata={"channel": "telegram"},
+    )
+    return {"ok": recorded}
 
 
 @router.get("/api/sessions/{token}/result", response_model=schemas.ResultRead, tags=["results"])

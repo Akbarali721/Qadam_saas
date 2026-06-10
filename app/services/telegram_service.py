@@ -22,6 +22,7 @@ def bot_username() -> str:
         TELEGRAM_BOT_USERNAME
         or os.getenv("TELEGRAM_BOT_USERNAME", "")
         or os.getenv("BOT_USERNAME", "")
+        or "qadam_loyihaBot"
     ).lstrip("@")
 
 
@@ -37,11 +38,32 @@ def webapp_url(path: str, fallback_base_url: str = "") -> str:
     return f"{base}{path if path.startswith('/') else f'/{path}'}"
 
 
-def love_partner_deep_link(*, token: str, fallback_url: str) -> str:
+REL_INVITE_PREFIX = "rel_invite_"
+LEGACY_LOVE_PARTNER_PREFIX = "love_partner_"
+
+
+def relationship_invite_deep_link(*, token: str, fallback_url: str = "") -> str:
+    """Telegram bot deep-link for partner invite: t.me/<bot>?start=rel_invite_<token>"""
     username = bot_username()
     if not username:
-        return fallback_url
-    return f"https://t.me/{username}?start=love_partner_{quote(token)}"
+        return fallback_url or webapp_url(f"/start/{token}")
+    return f"https://t.me/{username}?start={REL_INVITE_PREFIX}{token}"
+
+
+def love_partner_deep_link(*, token: str, fallback_url: str) -> str:
+    """Backward-compatible alias for relationship_invite_deep_link."""
+    return relationship_invite_deep_link(token=token, fallback_url=fallback_url)
+
+
+def parse_relationship_invite_token(payload: str) -> str | None:
+    for prefix in (REL_INVITE_PREFIX, LEGACY_LOVE_PARTNER_PREFIX):
+        if payload.startswith(prefix):
+            return payload.removeprefix(prefix).strip()
+    return None
+
+
+def telegram_share_url(*, url: str, text: str) -> str:
+    return f"https://t.me/share/url?url={quote(url, safe='')}&text={quote(text)}"
 
 
 def _post_telegram_method(method: str, payload: dict) -> tuple[bool, str]:

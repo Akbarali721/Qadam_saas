@@ -511,6 +511,14 @@ button.love-icon-btn {
   margin-top: 14px;
 }
 
+.share-info-text {
+  margin: 16px 0 0;
+  font-size: 14px;
+  line-height: 1.55;
+  text-align: center;
+  color: var(--love-muted);
+}
+
 .share-chip {
   display: inline-flex;
   align-items: center;

@@ -54,8 +54,9 @@ async def telegram_webhook(request: Request, db: DbSession = Depends(get_db)) ->
     payload = _start_payload(text)
     fallback_base_url = str(request.base_url).rstrip("/")
 
-    if payload.startswith("love_partner_"):
-        token = payload.removeprefix("love_partner_").strip()
+    invite_token = telegram_service.parse_relationship_invite_token(payload)
+    if invite_token:
+        token = invite_token
         session = crud.get_session_by_token(db=db, token=token)
         if session is None:
             telegram_service.send_message(
