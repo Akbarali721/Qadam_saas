@@ -12,7 +12,9 @@ from app.services import pdf_service, telegram_service
 from app.services.product_events_service import record_love_product_event
 from app.services.telegram_notify import (
     notify_love_user1_premium_unlocked,
+    notify_partner_completed_via_bot_admin,
     notify_user1_test_completed,
+    partner_telegram_id,
     resolve_public_base_url,
     user1_telegram_id,
 )
@@ -109,33 +111,87 @@ async def _notify_initiator_partner_completed(token: str, fallback_base_url: str
         except ValueError:
             logger.warning("Invalid creator_telegram_id=%s token=%s", raw_id, token)
             return
+        invite_token = token
+        partner_raw_id = partner_telegram_id(session)
+        partner_int: int | None = None
+        if partner_raw_id:
+            try:
+                partner_int = int(partner_raw_id)
+            except ValueError:
+                logger.warning(
+                    "Invalid partner_telegram_id=%s invite_token=%s",
+                    partner_raw_id,
+                    invite_token,
+                )
+
         logger.info(
-            "Telegram notify sending token=%s session_id=%s chat_id=%s",
-            token,
-            session.id,
+            "Partner completion detected invite_token=%s user1_telegram_id=%s "
+            "partner_telegram_id=%s session_id=%s",
+            invite_token,
             raw_id,
+            partner_raw_id or "(missing)",
+            session.id,
         )
-        try:
-            ok = await notify_user1_test_completed(
-                telegram_int,
-                token,
-                fallback_base_url=fallback_base_url,
+
+        ok = False
+        if partner_int is not None:
+            try:
+                ok, status, response_body = await notify_partner_completed_via_bot_admin(
+                    invite_token=invite_token,
+                    user1_telegram_id=telegram_int,
+                    partner_telegram_id=partner_int,
+                )
+                if not ok:
+                    logger.warning(
+                        "Bot admin partner-completed notify failed invite_token=%s "
+                        "status=%s body=%s",
+                        invite_token,
+                        status,
+                        response_body[:500],
+                    )
+            except Exception:
+                logger.exception(
+                    "Bot admin partner-completed notify exception invite_token=%s",
+                    invite_token,
+                )
+        else:
+            logger.warning(
+                "Bot admin partner-completed skipped: partner_telegram_id missing invite_token=%s",
+                invite_token,
             )
-        except Exception:
-            logger.exception(
-                "Telegram notify_user1_test_completed failed token=%s chat_id=%s",
-                token,
+
+        if not ok:
+            logger.info(
+                "Falling back to direct Telegram notify invite_token=%s user1_telegram_id=%s",
+                invite_token,
                 raw_id,
             )
-            return
+            try:
+                ok = await notify_user1_test_completed(
+                    telegram_int,
+                    token,
+                    fallback_base_url=fallback_base_url,
+                )
+            except Exception:
+                logger.exception(
+                    "Telegram notify_user1_test_completed failed token=%s chat_id=%s",
+                    token,
+                    raw_id,
+                )
+                return
+
         if ok:
             session.completion_notify_sent = True
             db.commit()
-            logger.info("Telegram notify marked sent token=%s session_id=%s", token, session.id)
+            logger.info(
+                "Partner completion notify marked sent invite_token=%s session_id=%s",
+                invite_token,
+                session.id,
+            )
         else:
             logger.warning(
-                "Telegram notify API returned failure token=%s chat_id=%s",
-                token,
+                "Partner completion notify failed invite_token=%s user1_telegram_id=%s",
+                invite_token,
                 raw_id,
             )
     except Exception:
@@ -480,6 +536,12 @@ def submit_answers(
         raise HTTPException(status_code=409, detail="Test allaqachon yakunlangan")
 
     role = payload.role.strip().lower()
+    if role == "partner" and payload.partner_telegram_id:
+        crud.set_partner_telegram_id(
+            db=db,
+            session=session,
+            telegram_id=payload.partner_telegram_id,
+        )
     try:
         completed = crud.submit_session_answers(db=db, session=session, payload=payload)
     except ValueError as exc:
@@ -493,8 +555,8 @@ def submit_answers(
     has_result = crud.get_result_by_session_id(db=db, session_id=session.id) is not None
     logger.info(
         "submit_answers token=%s session_id=%s role=%s completed=%s status=%s "
-        "creator_telegram_id=%s initiator_telegram_id=%s payment_status=%s "
-        "initiator_answered=%s partner_answered=%s has_result=%s",
+        "creator_telegram_id=%s initiator_telegram_id=%s partner_telegram_id=%s "
+        "payment_status=%s initiator_answered=%s partner_answered=%s has_result=%s",
         token,
         session.id,
         role,
@@ -502,6 +564,7 @@ def submit_answers(
         session.status,
         session.creator_telegram_id,
         session.initiator_telegram_id,
+        session.partner_telegram_id,
         session.payment_status,
         state["initiator_answered"],
         state["partner_answered"],

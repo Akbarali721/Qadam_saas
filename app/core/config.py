@@ -39,5 +39,7 @@ TELEGRAM_BOT_USERNAME = (
 ).lstrip("@")
 WEBAPP_BASE_URL = BASE_URL
 ADMIN_USERNAME = (os.getenv("ADMIN_USERNAME") or "").lstrip("@")
+ADMIN_TOKEN = (os.getenv("ADMIN_TOKEN") or "").strip()
 ADMIN_CHAT_ID = os.getenv("ADMIN_CHAT_ID") or ""
 ADMIN_CONTACT_URL = (os.getenv("ADMIN_CONTACT_URL") or "").strip()
+BOT_ADMIN_BASE_URL = (os.getenv("BOT_ADMIN_BASE_URL") or "").rstrip("/")

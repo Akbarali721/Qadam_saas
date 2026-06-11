@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import os
+from urllib import error as urlerror
+from urllib import request as urlrequest
 from urllib.parse import quote
 
 from app import models
@@ -21,6 +24,118 @@ def user1_telegram_id(session) -> str | None:
         session, "initiator_telegram_id", None
     )
     return raw.strip() if raw else None
+
+
+def partner_telegram_id(session) -> str | None:
+    raw = getattr(session, "partner_telegram_id", None)
+    return raw.strip() if raw else None
+
+
+def notify_partner_completed_via_bot_admin_sync(
+    *,
+    invite_token: str,
+    user1_telegram_id: int,
+    partner_telegram_id: int,
+) -> tuple[bool, int, str]:
+    """Notify qadam_bot admin API that partner finished the relationship test."""
+    bot_admin_base = (config.BOT_ADMIN_BASE_URL or os.getenv("BOT_ADMIN_BASE_URL") or "").rstrip("/")
+    admin_token = (config.ADMIN_TOKEN or os.getenv("ADMIN_TOKEN") or "").strip()
+    if not bot_admin_base:
+        detail = "BOT_ADMIN_BASE_URL is not configured"
+        logger.warning(
+            "Bot admin partner-completed skipped invite_token=%s reason=%s",
+            invite_token,
+            detail,
+        )
+        return False, 0, detail
+    if not admin_token:
+        detail = "ADMIN_TOKEN is not configured"
+        logger.warning(
+            "Bot admin partner-completed skipped invite_token=%s reason=%s",
+            invite_token,
+            detail,
+        )
+        return False, 0, detail
+
+    api_url = (
+        f"{bot_admin_base}/api/relationship/partner-completed"
+        f"?token={quote(admin_token, safe='')}"
+    )
+    payload = {
+        "invite_token": invite_token,
+        "user1_telegram_id": user1_telegram_id,
+        "partner_telegram_id": partner_telegram_id,
+    }
+    body_bytes = json.dumps(payload).encode("utf-8")
+
+    logger.info(
+        "Bot admin partner-completed request invite_token=%s user1_telegram_id=%s "
+        "partner_telegram_id=%s api_url=%s",
+        invite_token,
+        user1_telegram_id,
+        partner_telegram_id,
+        api_url,
+    )
+
+    req = urlrequest.Request(
+        api_url,
+        data=body_bytes,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urlrequest.urlopen(req, timeout=15) as response:
+            status = response.getcode()
+            response_body = response.read().decode("utf-8", errors="replace")
+    except urlerror.HTTPError as exc:
+        status = exc.code
+        response_body = exc.read().decode("utf-8", errors="replace")
+        logger.warning(
+            "Bot admin partner-completed HTTP error invite_token=%s status=%s body=%s",
+            invite_token,
+            status,
+            response_body[:500],
+        )
+        return False, status, response_body
+    except Exception as exc:
+        detail = f"Bot admin partner-completed request failed: {exc}"
+        logger.exception(
+            "Bot admin partner-completed error invite_token=%s api_url=%s",
+            invite_token,
+            api_url,
+        )
+        return False, 0, detail
+
+    if 200 <= status < 300:
+        logger.info(
+            "Bot admin partner-completed success invite_token=%s status=%s body=%s",
+            invite_token,
+            status,
+            response_body[:500],
+        )
+        return True, status, response_body
+
+    logger.warning(
+        "Bot admin partner-completed failed invite_token=%s status=%s body=%s",
+        invite_token,
+        status,
+        response_body[:500],
+    )
+    return False, status, response_body
+
+
+async def notify_partner_completed_via_bot_admin(
+    *,
+    invite_token: str,
+    user1_telegram_id: int,
+    partner_telegram_id: int,
+) -> tuple[bool, int, str]:
+    return await asyncio.to_thread(
+        notify_partner_completed_via_bot_admin_sync,
+        invite_token=invite_token,
+        user1_telegram_id=user1_telegram_id,
+        partner_telegram_id=partner_telegram_id,
+    )
 
 
 def resolve_public_base_url(*, fallback_base_url: str = "") -> str:
@@ -255,7 +370,7 @@ def notify_admin_premium_request_sync(
         )
         return False
 
-    admin_token = (os.getenv("ADMIN_TOKEN") or "").strip()
+    admin_token = (config.ADMIN_TOKEN or os.getenv("ADMIN_TOKEN") or "").strip()
     if not admin_token:
         logger.warning(
             "Admin premium request notify skipped: ADMIN_TOKEN not configured token=%s",

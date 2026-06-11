@@ -124,6 +124,7 @@ class AnswerSubmitItem(BaseModel):
 class AnswerSubmitRequest(BaseModel):
     role: str = Field(..., pattern="^(initiator|partner)$")
     answers: list[AnswerSubmitItem] = Field(..., min_length=1)
+    partner_telegram_id: str | None = None
 
 
 class SessionProgressUpdate(BaseModel):

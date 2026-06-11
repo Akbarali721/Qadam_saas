@@ -799,13 +799,17 @@ async function loadQuestionsPage() {
           }
 
           try {
+            const submitBody = { role, answers };
+            if (role === "partner") {
+              const partnerTgId = getTelegramUserId();
+              if (partnerTgId) {
+                submitBody.partner_telegram_id = partnerTgId;
+              }
+            }
             const submitResponse = await fetch(`/api/sessions/${token}/answers`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                role,
-                answers,
-              }),
+              body: JSON.stringify(submitBody),
             });
             if (!submitResponse.ok) {
               throw new Error(await parseError(submitResponse));
