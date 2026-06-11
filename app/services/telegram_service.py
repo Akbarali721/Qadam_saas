@@ -16,6 +16,10 @@ def _bot_token() -> str:
     return TELEGRAM_BOT_TOKEN or os.getenv("TELEGRAM_BOT_TOKEN") or os.getenv("BOT_TOKEN") or ""
 
 
+def bot_token_configured() -> bool:
+    return bool(_bot_token())
+
+
 def bot_username() -> str:
     load_environment()
     return (

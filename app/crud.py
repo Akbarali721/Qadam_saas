@@ -508,19 +508,18 @@ def _try_finalize_pair_session(db: Session, session: models.Session, expected_co
     if not _answers_blob_complete(session.answers_partner, expected_count):
         return
     existing = get_result_by_session_id(db=db, session_id=session.id)
-    if existing is not None:
-        return
-    payload = build_pair_result_payload(db=db, session=session)
-    db.add(
-        models.Result(
-            session_id=session.id,
-            score=payload["total_score"],
-            dimension_scores=json.dumps(payload["dimension_scores"], sort_keys=True),
-            summary=payload["summary"],
-            advice=payload["advice"],
-            differences=payload["differences"],
-        ),
-    )
+    if existing is None:
+        payload = build_pair_result_payload(db=db, session=session)
+        db.add(
+            models.Result(
+                session_id=session.id,
+                score=payload["total_score"],
+                dimension_scores=json.dumps(payload["dimension_scores"], sort_keys=True),
+                summary=payload["summary"],
+                advice=payload["advice"],
+                differences=payload["differences"],
+            ),
+        )
     mark_session_completed(session)
 
 

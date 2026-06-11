@@ -56,7 +56,14 @@ def on_startup() -> None:
 
 
 def _print_startup_diagnostics() -> None:
+    from app.services import telegram_service
+
     print(f"[startup] cwd={os.getcwd()}", flush=True)
+    print(
+        f"[startup] bot_token_configured={telegram_service.bot_token_configured()} "
+        f"database_url_set={bool(os.getenv('DATABASE_URL'))}",
+        flush=True,
+    )
     print(f"[startup] imported_app={__name__}:app file={__file__} app_id={id(app)}", flush=True)
     print("[startup] registered routes:", flush=True)
     for route in sorted(app.routes, key=lambda item: (getattr(item, "path", ""), getattr(item, "name", ""))):

@@ -150,55 +150,67 @@ def resolve_public_base_url(*, fallback_base_url: str = "") -> str:
     return ""
 
 
+USER1_PARTNER_COMPLETED_MESSAGE = (
+    "✅ Juftingiz ham testni yakunladi. Umumiy natijani ko‘rish uchun quyidagi tugmani bosing."
+)
+
+
 def notify_user1_test_completed_sync(
     telegram_id: int,
     token: str,
     *,
     fallback_base_url: str = "",
 ) -> bool:
-    """User1 ga natija tugmasi bilan xabar yuboradi. Xatolikda False va log."""
-    public_base = resolve_public_base_url(fallback_base_url=fallback_base_url)
-    if not public_base:
-        logger.warning(
-            "Telegram notify skipped: BASE_URL / WEBAPP_BASE_URL empty and no fallback (token=%s)",
+    """User1 ga BOT_TOKEN orqali natija xabari yuboradi."""
+    if not telegram_service.bot_token_configured():
+        logger.error(
+            "Telegram sendMessage skipped: BOT_TOKEN / TELEGRAM_BOT_TOKEN not configured "
+            "invite_token=%s owner_telegram_id=%s",
             token,
+            telegram_id,
         )
         return False
 
     chat_id = str(telegram_id)
-    result_url = f"{public_base}/result/{token}"
-
-    reply_markup = {
-        "inline_keyboard": [
-            [{"text": "Natijani ko‘rish", "url": result_url}],
-        ],
-    }
+    public_base = resolve_public_base_url(fallback_base_url=fallback_base_url)
+    result_url = f"{public_base}/result/{token}" if public_base else ""
+    reply_markup = None
+    if result_url:
+        reply_markup = {
+            "inline_keyboard": [
+                [{"text": "Natijani ko‘rish", "url": result_url}],
+            ],
+        }
+    else:
+        logger.warning(
+            "Telegram notify: BASE_URL missing, sending text without button invite_token=%s",
+            token,
+        )
 
     logger.info(
-        "Telegram notify API call event=test_completed token=%s chat_id=%s result_url=%s public_base=%s",
+        "Telegram sendMessage call invite_token=%s owner_telegram_id=%s result_url=%s "
+        "bot_token_configured=%s",
         token,
         chat_id,
-        result_url,
-        public_base,
+        result_url or "(none)",
+        True,
     )
     ok, err = telegram_service.send_message(
         chat_id=chat_id,
-        text="Sherigingiz testni yakunladi. Natijani ko‘rish uchun tugmani bosing.",
+        text=USER1_PARTNER_COMPLETED_MESSAGE,
         reply_markup=reply_markup,
     )
     if ok:
         logger.info(
-            "Telegram notify success event=test_completed token=%s chat_id=%s result_url=%s",
+            "Telegram sendMessage success invite_token=%s owner_telegram_id=%s",
             token,
             chat_id,
-            result_url,
         )
     else:
         logger.warning(
-            "Telegram notify failed event=test_completed token=%s chat_id=%s result_url=%s detail=%s",
+            "Telegram sendMessage failed invite_token=%s owner_telegram_id=%s detail=%s",
             token,
             chat_id,
-            result_url,
             err,
         )
     return ok
