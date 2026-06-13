@@ -22,15 +22,14 @@
           data-token="{{ token }}"
         />
         <div class="love-actions">
-          <a
+          <button
             id="telegram-share-btn"
             class="love-btn love-btn--primary"
-            href="{{ telegram_share_url }}"
-            target="_blank"
-            rel="noopener noreferrer"
+            type="button"
+            data-share-url="{{ telegram_share_url }}"
           >
             📨 Telegram orqali yuborish
-          </a>
+          </button>
           <button id="copy-partner-link" class="love-btn love-btn--secondary" type="button">
             🔗 Havolani nusxalash
           </button>
@@ -41,39 +40,7 @@
         <p id="message" class="form-message" role="alert"></p>
       </div>
     </main>
-    <script>
-      const inviteLink = document.getElementById("partner-link")?.value || "";
-      const sessionToken = document.getElementById("partner-link")?.dataset.token || "";
-      const msg = document.getElementById("message");
-
-      async function copyInviteLink() {
-        if (!inviteLink) {
-          if (msg) msg.textContent = "Taklif havolasi tayyor emas.";
-          return;
-        }
-        try {
-          await navigator.clipboard.writeText(inviteLink);
-          if (msg) msg.textContent = "Havola nusxalandi.";
-        } catch {
-          if (msg) msg.textContent = "Nusxalab bo‘lmadi.";
-        }
-      }
-
-      async function trackInviteShareClick() {
-        if (!sessionToken) return;
-        try {
-          await fetch(`/api/sessions/${encodeURIComponent(sessionToken)}/events/invite-share`, {
-            method: "POST",
-          });
-        } catch {
-          // Analytics should not block sharing.
-        }
-      }
-
-      document.getElementById("copy-partner-link")?.addEventListener("click", copyInviteLink);
-      document.getElementById("telegram-share-btn")?.addEventListener("click", () => {
-        trackInviteShareClick();
-      });
-    </script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="/static/app.js?v=2"></script>
   </body>
 </html>

@@ -10,6 +10,16 @@ function setToken(token) {
 }
 
 const INITIATOR_TG_ID_KEY = "initiator_tg_id";
+const PARTNER_TG_ID_KEY = "partner_tg_id";
+const FLOW_LOG_PREFIX = "[love-flow]";
+
+function flowLog(step, detail) {
+  const suffix =
+    detail === undefined
+      ? ""
+      : ` ${typeof detail === "string" ? detail : JSON.stringify(detail)}`;
+  console.log(`${FLOW_LOG_PREFIX} ${step}${suffix}`);
+}
 
 function normalizeTelegramId(raw) {
   if (raw === undefined || raw === null) {
@@ -22,6 +32,64 @@ function normalizeTelegramId(raw) {
 function readTgIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
   return normalizeTelegramId(params.get("tg_id"));
+}
+
+function persistPartnerTelegramId(id) {
+  const normalized = normalizeTelegramId(id);
+  if (!normalized) {
+    return null;
+  }
+  try {
+    sessionStorage.setItem(PARTNER_TG_ID_KEY, normalized);
+  } catch (_error) {
+    // ignore private mode / quota errors
+  }
+  return normalized;
+}
+
+function getPartnerTelegramUserId() {
+  const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  const fromSdk = normalizeTelegramId(user?.id);
+  if (fromSdk) {
+    return persistPartnerTelegramId(fromSdk);
+  }
+
+  try {
+    const fromStorage = normalizeTelegramId(
+      sessionStorage.getItem(PARTNER_TG_ID_KEY),
+    );
+    if (fromStorage) {
+      return fromStorage;
+    }
+  } catch (_error) {
+    // ignore
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const fromUrl = normalizeTelegramId(params.get("partner_tg_id"));
+  if (fromUrl) {
+    return persistPartnerTelegramId(fromUrl);
+  }
+
+  return null;
+}
+
+function initTelegramWebApp() {
+  const webApp = window.Telegram?.WebApp;
+  if (!webApp) {
+    flowLog("telegram_webapp_unavailable");
+    return;
+  }
+  try {
+    webApp.ready();
+    webApp.expand?.();
+    flowLog("telegram_webapp_ready", {
+      platform: webApp.platform || "unknown",
+      version: webApp.version || "unknown",
+    });
+  } catch (error) {
+    flowLog("telegram_webapp_init_failed", error?.message || String(error));
+  }
 }
 
 function persistInitiatorTelegramId(id) {
@@ -78,9 +146,11 @@ function initIndexTelegramId() {
   const fromUrl = readTgIdFromUrl();
   if (fromUrl) {
     persistInitiatorTelegramId(fromUrl);
+    flowLog("initiator_tg_id_from_url", { tgId: fromUrl });
     return;
   }
-  getTelegramUserId();
+  const tgId = getTelegramUserId();
+  flowLog("initiator_tg_id_resolved", { tgId: tgId || "(missing)" });
 }
 
 function dimensionLabel(key) {
@@ -384,11 +454,18 @@ async function parseError(response) {
 }
 
 function revealLoveProfileForm() {
+  flowLog("profile_form_reveal");
   const profileSection =
     document.getElementById("profile-section") ||
     document.getElementById("love-step-form");
   if (!profileSection) {
+    flowLog("profile_form_missing");
     return;
+  }
+
+  const heroSection = document.getElementById("love-step-hero");
+  if (heroSection) {
+    heroSection.hidden = true;
   }
 
   if (profileSection.classList.contains("hidden")) {
@@ -406,6 +483,7 @@ function revealLoveProfileForm() {
 }
 
 async function startTest() {
+  flowLog("session_create_start");
   setMessage("");
   const button = document.getElementById("profile-submit-btn");
   const form = document.getElementById("initiator-form");
@@ -463,10 +541,12 @@ async function startTest() {
       throw new Error("Javobda sessiya tokeni topilmadi");
     }
 
+    flowLog("session_created", { token: session.token });
     setToken(session.token);
     const tok = session.token;
     window.location.href = `/quiz/init/${encodeURIComponent(tok)}`;
   } catch (error) {
+    flowLog("session_create_failed", error.message || String(error));
     setMessage(error.message || "Sessiya yaratilmadi");
     if (button) {
       button.disabled = false;
@@ -614,9 +694,11 @@ function flashSavedBubble() {
 async function resolveQuizRole(token, preferredRole) {
   const st = await getSessionState(token);
   const requested = (preferredRole || "").trim().toLowerCase();
+  flowLog("quiz_role_resolve", { token, requested, state: st });
 
   if (requested === "initiator") {
     if (st.initiator_answered) {
+      flowLog("quiz_redirect_share", { token });
       window.location.replace(`/share/${encodeURIComponent(token)}?host=1`);
       return null;
     }
@@ -624,10 +706,12 @@ async function resolveQuizRole(token, preferredRole) {
   }
 
   if (!st.partner_registered) {
+    flowLog("quiz_redirect_partner_register", { token });
     window.location.replace(`/start/${encodeURIComponent(token)}`);
     return null;
   }
   if (st.partner_answered) {
+    flowLog("quiz_redirect_partner_complete", { token });
     window.location.replace(`/partner/complete/${encodeURIComponent(token)}`);
     return null;
   }
@@ -683,7 +767,9 @@ async function getSessionState(token) {
 
 async function loadQuestionsPage() {
   const token = hydrateTokenFromUrl();
+  flowLog("questions_page_load", { token: token || "(missing)" });
   if (!token) {
+    flowLog("questions_missing_token_redirect_home");
     window.location.href = "/";
     return;
   }
@@ -801,11 +887,12 @@ async function loadQuestionsPage() {
           try {
             const submitBody = { role, answers };
             if (role === "partner") {
-              const partnerTgId = getTelegramUserId();
+              const partnerTgId = getPartnerTelegramUserId();
               if (partnerTgId) {
                 submitBody.partner_telegram_id = partnerTgId;
               }
             }
+            flowLog("answers_submit", { token, role, answerCount: answers.length });
             const submitResponse = await fetch(`/api/sessions/${token}/answers`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -815,15 +902,19 @@ async function loadQuestionsPage() {
               throw new Error(await parseError(submitResponse));
             }
             const data = await submitResponse.json();
+            flowLog("answers_submit_ok", { token, role, status: data.status });
             if (data.status === "completed") {
               if (role === "initiator") {
+                flowLog("redirect_share", { token });
                 window.location.href = `/share/${encodeURIComponent(token)}?host=1`;
                 return;
               }
+              flowLog("redirect_partner_complete", { token });
               window.location.href = `/partner/complete/${encodeURIComponent(token)}`;
               return;
             } else {
               if (role === "initiator") {
+                flowLog("redirect_share_partial", { token });
                 window.location.href = `/share/${encodeURIComponent(token)}?host=1`;
                 return;
               }
@@ -833,6 +924,7 @@ async function loadQuestionsPage() {
               }
             }
           } catch (error) {
+            flowLog("answers_submit_failed", error.message || String(error));
             setMessage(error.message || "Javoblarni yuborib bo‘lmadi");
             if (submitButton) {
               submitButton.disabled = false;
@@ -841,13 +933,16 @@ async function loadQuestionsPage() {
         });
     }
   } catch (error) {
+    flowLog("questions_page_failed", error.message || String(error));
     setMessage(error.message || "Savollarni yuklab bo‘lmadi");
   }
 }
 
 async function loadResultPage() {
   const token = hydrateTokenFromUrl();
+  flowLog("result_page_load", { token: token || "(missing)" });
   if (!token) {
+    flowLog("result_missing_token_redirect_home");
     window.location.href = "/";
     return;
   }
@@ -913,6 +1008,11 @@ async function loadResultPage() {
     if (cardEl) {
       cardEl.classList.remove("hidden");
     }
+    flowLog("result_rendered", {
+      token,
+      score: result.total_score,
+      teaserCount: dimensionTeasersEl?.children.length || 0,
+    });
     const shareBtn = document.getElementById("result-share-btn");
     shareBtn?.addEventListener("click", async () => {
       const url = `${window.location.origin}/result/${encodeURIComponent(token)}`;
@@ -938,13 +1038,100 @@ async function loadResultPage() {
     });
 
   } catch (error) {
+    flowLog("result_page_failed", error.message || String(error));
     setMessage(error.message || "Natijani yuklab bo‘lmadi");
   }
 }
 
+function initSharePage() {
+  const inviteInput = document.getElementById("partner-link");
+  const inviteLink = inviteInput?.value || "";
+  const sessionToken = inviteInput?.dataset.token || "";
+  const msg = document.getElementById("message");
+  const shareBtn = document.getElementById("telegram-share-btn");
+  const copyBtn = document.getElementById("copy-partner-link");
+  const shareUrl = shareBtn?.dataset.shareUrl || shareBtn?.getAttribute("href") || "";
+
+  flowLog("share_page_init", {
+    token: sessionToken || "(missing)",
+    hasInviteLink: Boolean(inviteLink),
+    hasShareUrl: Boolean(shareUrl),
+  });
+
+  async function copyInviteLink() {
+    if (!inviteLink) {
+      flowLog("share_copy_missing_link");
+      if (msg) msg.textContent = "Taklif havolasi tayyor emas.";
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      flowLog("share_copy_ok");
+      if (msg) msg.textContent = "Havola nusxalandi.";
+    } catch {
+      try {
+        const helper = document.createElement("textarea");
+        helper.value = inviteLink;
+        helper.setAttribute("readonly", "");
+        helper.style.position = "fixed";
+        helper.style.left = "-9999px";
+        document.body.appendChild(helper);
+        helper.select();
+        document.execCommand("copy");
+        helper.remove();
+        flowLog("share_copy_ok_fallback");
+        if (msg) msg.textContent = "Havola nusxalandi.";
+      } catch {
+        flowLog("share_copy_failed");
+        if (msg) msg.textContent = "Nusxalab bo‘lmadi.";
+      }
+    }
+  }
+
+  async function trackInviteShareClick() {
+    if (!sessionToken) return;
+    try {
+      await fetch(`/api/sessions/${encodeURIComponent(sessionToken)}/events/invite-share`, {
+        method: "POST",
+      });
+      flowLog("share_track_ok", { token: sessionToken });
+    } catch {
+      flowLog("share_track_failed", { token: sessionToken });
+    }
+  }
+
+  function openTelegramShare(event) {
+    event?.preventDefault();
+    if (!shareUrl) {
+      flowLog("share_open_missing_url");
+      if (msg) msg.textContent = "Telegram ulashish havolasi tayyor emas.";
+      return;
+    }
+    trackInviteShareClick();
+    const webApp = window.Telegram?.WebApp;
+    if (webApp?.openTelegramLink && shareUrl.startsWith("https://t.me/")) {
+      flowLog("share_open_telegram_link", { url: shareUrl });
+      webApp.openTelegramLink(shareUrl);
+      return;
+    }
+    if (webApp?.openLink) {
+      flowLog("share_open_link", { url: shareUrl });
+      webApp.openLink(shareUrl);
+      return;
+    }
+    flowLog("share_open_window", { url: shareUrl });
+    window.open(shareUrl, "_blank", "noopener,noreferrer");
+  }
+
+  copyBtn?.addEventListener("click", copyInviteLink);
+  shareBtn?.addEventListener("click", openTelegramShare);
+}
+
 function init() {
   const page = document.body.dataset.page;
+  flowLog("page_init", { page: page || "(missing)" });
   if (page === "index") {
+    initTelegramWebApp();
     initIndexTelegramId();
     const startBtn =
       document.getElementById("start-test-btn") ||
@@ -955,6 +1142,11 @@ function init() {
     if (startBtn && profileSection) {
       startBtn.addEventListener("click", () => {
         revealLoveProfileForm();
+      });
+    } else {
+      flowLog("index_start_binding_missing", {
+        hasStartBtn: Boolean(startBtn),
+        hasProfileSection: Boolean(profileSection),
       });
     }
     const initiatorForm = document.getElementById("initiator-form");
@@ -973,9 +1165,13 @@ function init() {
   }
 
   if (page === "partner") {
+    initTelegramWebApp();
+    const partnerTgId = getPartnerTelegramUserId();
+    flowLog("partner_page_init", { partnerTgId: partnerTgId || "(missing)" });
     const partnerForm = document.getElementById("partner-form");
     partnerForm?.addEventListener("submit", async (event) => {
       event.preventDefault();
+      flowLog("partner_register_start");
       const msg = document.getElementById("message");
       if (msg) {
         msg.textContent = "";
@@ -984,6 +1180,7 @@ function init() {
       const token = tokenEl ? tokenEl.value : "";
       const form = document.getElementById("partner-form");
       if (!form || !form.reportValidity()) {
+        flowLog("partner_register_invalid_form");
         return;
       }
       const nameInput = document.getElementById("partner-name");
@@ -994,6 +1191,7 @@ function init() {
       if (btn) {
         btn.disabled = true;
       }
+      const partnerTelegramId = getPartnerTelegramUserId();
       try {
         const res = await fetch(`/api/sessions/${token}/partner`, {
           method: "POST",
@@ -1003,15 +1201,20 @@ function init() {
             partner_age: ageInput ? Number(ageInput.value) : 0,
             partner_gender: genderEl ? genderEl.value : "",
             partner_zodiac: zodiacEl ? zodiacEl.value : "",
-            partner_telegram_id: getTelegramUserId(),
+            partner_telegram_id: partnerTelegramId,
           }),
         });
         if (!res.ok) {
           throw new Error(await parseError(res));
         }
+        if (partnerTelegramId) {
+          persistPartnerTelegramId(partnerTelegramId);
+        }
+        flowLog("partner_register_ok", { token, partnerTgId: partnerTelegramId || "(missing)" });
         setToken(token);
         window.location.href = `/questions.html?token=${encodeURIComponent(token)}&role=partner`;
       } catch (error) {
+        flowLog("partner_register_failed", error.message || String(error));
         if (msg) {
           msg.textContent = error.message || "Saqlab bo‘lmadi";
         }
@@ -1020,6 +1223,12 @@ function init() {
         }
       }
     });
+    return;
+  }
+
+  if (page === "share") {
+    initTelegramWebApp();
+    initSharePage();
     return;
   }
 
