@@ -981,3 +981,312 @@ body[data-page="result"] .zodiac-note {
   color: #64748b;
   font-style: italic;
 }
+
+/* —— Qadam intro screens (relationship, MBTI, stress) —— */
+
+.brand-banner {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 24px 24px 0 0;
+}
+
+.brand-banner img {
+  width: 100%;
+  height: auto;
+  max-height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .brand-banner img {
+    max-height: 220px;
+  }
+}
+
+.content-section {
+  padding-top: 28px;
+}
+
+.qadam-intro-card--banner {
+  padding: 0 0 26px;
+}
+
+.qadam-intro-card--banner .content-section {
+  padding: 28px 22px 0;
+}
+
+.qadam-intro-card--banner::before {
+  display: none;
+}
+
+.qadam-intro-body {
+  min-height: 100vh;
+  margin: 0;
+  padding: 20px 16px 36px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Arial,
+    sans-serif;
+  color: var(--text);
+  line-height: 1.5;
+  background: radial-gradient(900px 480px at 50% -8%, #c7d2fe 0%, transparent 58%),
+    linear-gradient(180deg, #eef2ff 0%, #f8fafc 100%);
+}
+
+.qadam-intro-body--love {
+  background: radial-gradient(circle at 12% 0%, rgb(255 225 239 / 0.55), transparent 32%),
+    radial-gradient(circle at 92% 4%, rgb(219 232 255 / 0.7), transparent 34%),
+    linear-gradient(180deg, #f6efff 0%, #eef3ff 52%, #f8fbff 100%);
+}
+
+.qadam-intro-body--stress {
+  background: radial-gradient(circle at 10% 0%, rgb(20 184 166 / 0.18), transparent 32%),
+    radial-gradient(circle at 94% 6%, rgb(79 70 229 / 0.14), transparent 30%),
+    linear-gradient(180deg, #f0fdfa 0%, #eef2ff 100%);
+}
+
+.qadam-intro-shell {
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.qadam-intro-card {
+  position: relative;
+  overflow: hidden;
+  background: rgb(255 255 255 / 0.97);
+  border: 1px solid rgb(255 255 255 / 0.9);
+  border-radius: 24px;
+  padding: 28px 22px 26px;
+  box-shadow: 0 4px 6px -1px rgb(15 23 42 / 0.05), 0 20px 44px -12px rgb(15 23 42 / 0.12);
+}
+
+.qadam-intro-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 112px;
+  background: linear-gradient(135deg, rgb(224 231 255 / 0.85), rgb(241 245 249 / 0.4));
+  pointer-events: none;
+}
+
+.qadam-intro-body--love .qadam-intro-card::before {
+  background: linear-gradient(135deg, rgb(255 233 243 / 0.88), rgb(233 241 255 / 0.75));
+}
+
+.qadam-intro-body--stress .qadam-intro-card::before {
+  background: linear-gradient(135deg, rgb(204 251 241 / 0.75), rgb(224 231 255 / 0.55));
+}
+
+.qadam-intro-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.qadam-intro-header {
+  margin-bottom: 22px;
+}
+
+.qadam-intro-kicker {
+  margin: 0 0 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.qadam-intro-body--love .qadam-intro-kicker {
+  color: #6d28d9;
+}
+
+.qadam-intro-body--stress .qadam-intro-kicker {
+  color: #0f766e;
+}
+
+.qadam-intro-title {
+  margin: 0 0 12px;
+  font-size: clamp(1.45rem, 5.2vw, 1.85rem);
+  font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: -0.025em;
+  color: var(--text);
+}
+
+.qadam-intro-lead {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.qadam-intro-benefits {
+  list-style: none;
+  margin: 0 0 22px;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.qadam-intro-benefit {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: rgb(248 250 252 / 0.85);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #334155;
+}
+
+.qadam-intro-benefit__icon {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 8.2l2.4 2.4L12 5.2' stroke='%234f46e5' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 12px;
+}
+
+.qadam-intro-body--love .qadam-intro-benefit__icon {
+  background-color: #ede9fe;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 8.2l2.4 2.4L12 5.2' stroke='%237c3aed' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.qadam-intro-body--stress .qadam-intro-benefit__icon {
+  background-color: #ccfbf1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 8.2l2.4 2.4L12 5.2' stroke='%230f766e' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.qadam-intro-value {
+  margin-bottom: 24px;
+  padding: 18px 16px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: rgb(248 250 252 / 0.65);
+}
+
+.qadam-intro-value__heading {
+  margin: 0 0 14px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.qadam-intro-value__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 12px;
+  counter-reset: qadam-value;
+}
+
+.qadam-intro-value__list li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #334155;
+  counter-increment: qadam-value;
+}
+
+.qadam-intro-value__list li::before {
+  flex: 0 0 auto;
+  content: counter(qadam-value);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.qadam-intro-body--love .qadam-intro-value__list li::before {
+  background: #7c3aed;
+}
+
+.qadam-intro-cta {
+  display: grid;
+  gap: 12px;
+}
+
+.qadam-intro-form {
+  margin: 0;
+}
+
+.qadam-intro-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 54px;
+  border: 0;
+  border-radius: 16px;
+  padding: 15px 20px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #fff;
+  cursor: pointer;
+  background: linear-gradient(135deg, #6366f1, var(--primary));
+  box-shadow: 0 10px 28px rgb(79 70 229 / 0.28);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.qadam-intro-btn:active {
+  transform: scale(0.985);
+}
+
+.qadam-intro-body--love .qadam-intro-btn {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  box-shadow: 0 10px 28px rgb(124 58 237 / 0.28);
+}
+
+.qadam-intro-body--stress .qadam-intro-btn {
+  background: linear-gradient(135deg, #0f766e, #4f46e5);
+  box-shadow: 0 10px 28px rgb(15 118 110 / 0.24);
+}
+
+.qadam-intro-note {
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+@media (min-width: 680px) {
+  .qadam-intro-body {
+    padding-top: 32px;
+  }
+
+  .qadam-intro-card {
+    padding: 32px 28px 28px;
+  }
+
+  .qadam-intro-card--banner {
+    padding: 0 0 28px;
+  }
+
+  .qadam-intro-card--banner .content-section {
+    padding: 28px 28px 0;
+  }
+
+  .qadam-intro-body--stress .qadam-intro-benefits--grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -56,6 +56,48 @@ body[data-page="result"] {
   z-index: 1;
 }
 
+.love-card--banner {
+  padding: 0;
+}
+
+.love-card--banner .brand-banner {
+  border-radius: 28px 28px 0 0;
+}
+
+.love-card--banner .content-section {
+  padding: 28px 22px 0;
+}
+
+.love-card--banner .love-step--form {
+  padding: 22px;
+}
+
+.love-card--banner::before {
+  display: none;
+}
+
+.love-body .qadam-intro-kicker {
+  color: #6d28d9;
+}
+
+.love-body .qadam-intro-benefit__icon {
+  background-color: #ede9fe;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M4 8.2l2.4 2.4L12 5.2' stroke='%237c3aed' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.love-body .qadam-intro-value__list li::before {
+  background: #7c3aed;
+}
+
+.love-body .qadam-intro-btn {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  box-shadow: 0 10px 28px rgb(124 58 237 / 0.28);
+}
+
+.love-step--hero .love-actions {
+  margin-top: 0;
+}
+
 .love-hero {
   text-align: center;
   padding-top: 8px;

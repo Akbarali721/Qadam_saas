@@ -3,47 +3,58 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sevgi testi</title>
+    <title>Munosabat testi</title>
     <link rel="stylesheet" href="/static/style.css" />
     <link rel="stylesheet" href="/static/love.css" />
   </head>
   <body data-page="index" class="app-body app-body--onboarding love-body">
     <main class="love-shell">
-      <div class="love-card">
-        <section id="love-step-hero" class="love-step love-step--hero" aria-label="Sevgi testi">
-          <header class="love-hero">
-            <h1 class="love-title">Sevgi testi</h1>
-            <p class="love-subtitle">
-              2 kishi javob beradi, tizim esa sizlarning moslik darajangizni hisoblaydi.
+      <div class="love-card love-card--banner">
+        <div class="brand-banner">
+          <img src="/static/img/qadam-banner.png" alt="Qadam banner">
+        </div>
+        <section id="love-step-hero" class="love-step love-step--hero" aria-label="Munosabat testi">
+          <div class="content-section">
+          <header class="qadam-intro-header">
+            <p class="qadam-intro-kicker">Munosabat testi</p>
+            <h1 class="qadam-intro-title">Bir-biringizni qanchalik tushunishingizni bilib oling</h1>
+            <p class="qadam-intro-lead">
+              Ba’zan muammo sevgida emas, bir-birini tushunmaslikda bo‘ladi.
             </p>
           </header>
 
-          <div class="love-benefits" aria-label="Afzalliklar">
-            <div class="love-benefit"><span>⏱</span> 2 daqiqada</div>
-            <div class="love-benefit"><span>💬</span> Ilmiy asoslangan savollar</div>
-            <div class="love-benefit"><span>💞</span> Natijani sherigingiz bilan ko‘ring</div>
-          </div>
+          <ul class="qadam-intro-benefits" aria-label="Afzalliklar">
+            <li class="qadam-intro-benefit">
+              <span class="qadam-intro-benefit__icon" aria-hidden="true"></span>
+              <span>Muloqot uslubingizni ko‘rasiz</span>
+            </li>
+            <li class="qadam-intro-benefit">
+              <span class="qadam-intro-benefit__icon" aria-hidden="true"></span>
+              <span>Kelishmovchilik nuqtalaringiz aniqlanadi</span>
+            </li>
+            <li class="qadam-intro-benefit">
+              <span class="qadam-intro-benefit__icon" aria-hidden="true"></span>
+              <span>Kuchli tomonlaringiz bilinadi</span>
+            </li>
+          </ul>
 
-          <section id="how-it-works" class="love-how love-how--compact" aria-label="Qanday ishlaydi">
-            <h2 class="love-how-heading">Qanday ishlaydi?</h2>
-            <div class="love-how-item">
-              <span class="love-how-num">1</span>
-              <span>Profilingizni to‘ldirasiz</span>
-            </div>
-            <div class="love-how-item">
-              <span class="love-how-num">2</span>
-              <span>Savollarga javob berib havolani yuborasiz</span>
-            </div>
-            <div class="love-how-item">
-              <span class="love-how-num">3</span>
-              <span>Sherigingiz javob bergach umumiy natija chiqadi</span>
-            </div>
+          <section id="how-it-works" class="qadam-intro-value" aria-label="Sizga nima beradi">
+            <h2 class="qadam-intro-value__heading">Sizga nima beradi?</h2>
+            <ol class="qadam-intro-value__list">
+              <li>O‘zingiz va sherigingiz qanday muloqot qilishini tushunasiz</li>
+              <li>Qaysi joylarda ko‘proq kelishmovchilik chiqishini ko‘rasiz</li>
+              <li>Natijani birgalikda muhokama qilish osonlashadi</li>
+            </ol>
           </section>
 
-          <div class="love-actions">
-            <button id="start-test-btn" class="love-btn love-btn--primary" type="button">
-              Testni boshlash
+          <div class="qadam-intro-cta love-actions">
+            <button id="start-test-btn" class="qadam-intro-btn" type="button">
+              Natijani bilish →
             </button>
+            <p class="qadam-intro-note">
+              2 daqiqa. 2 kishi javob beradi. Natija umumiy chiqadi.
+            </p>
+          </div>
           </div>
         </section>
 

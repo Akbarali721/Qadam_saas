@@ -5,104 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Stress testi - Qadam</title>
     <link rel="stylesheet" href="/static/style.css" />
-    <style>
-      * { box-sizing: border-box; }
-      body {
-        min-height: 100vh;
-        margin: 0;
-        background:
-          radial-gradient(circle at 12% 0%, rgb(20 184 166 / 0.22), transparent 30%),
-          radial-gradient(circle at 92% 10%, rgb(79 70 229 / 0.18), transparent 28%),
-          linear-gradient(180deg, #f0fdfa 0%, #eef2ff 100%);
-      }
-      .stress-shell { max-width: 760px; margin: 0 auto; padding: 40px 16px; }
-      .stress-card {
-        overflow: hidden;
-        background: #fff;
-        border: 1px solid #dbeafe;
-        border-radius: 28px;
-        padding: 30px;
-        box-shadow: 0 24px 60px rgb(15 23 42 / 0.10);
-      }
-      .stress-kicker {
-        color: #0f766e;
-        font-weight: 850;
-        text-transform: uppercase;
-        letter-spacing: .08em;
-      }
-      .stress-title {
-        margin: 10px 0 12px;
-        color: #0f172a;
-        font-size: clamp(2rem, 6vw, 3.4rem);
-        line-height: 1.05;
-      }
-      .stress-lead {
-        margin: 0;
-        color: #475569;
-        font-size: 1.05rem;
-        line-height: 1.7;
-      }
-      .stress-grid {
-        display: grid;
-        gap: 12px;
-        margin: 24px 0;
-      }
-      .stress-benefit {
-        border-radius: 18px;
-        padding: 15px;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        color: #334155;
-        font-weight: 700;
-        line-height: 1.45;
-      }
-      .stress-btn {
-        display: inline-flex;
-        justify-content: center;
-        width: 100%;
-        border: 0;
-        border-radius: 16px;
-        padding: 15px 18px;
-        background: linear-gradient(135deg, #0f766e, #4f46e5);
-        color: #fff;
-        font-weight: 850;
-        font-size: 1rem;
-        text-decoration: none;
-        cursor: pointer;
-        box-shadow: 0 16px 36px rgb(15 118 110 / 0.24);
-      }
-      .stress-note {
-        margin: 14px 0 0;
-        text-align: center;
-        color: #64748b;
-        font-size: .95rem;
-      }
-      @media (min-width: 680px) {
-        .stress-card { padding: 42px; }
-        .stress-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-      }
-    </style>
   </head>
-  <body>
-    <main class="stress-shell">
-      <section class="stress-card">
-        <p class="stress-kicker">Qadam Stress Test</p>
-        <h1 class="stress-title">Stress darajangizni 2 daqiqada bilib oling</h1>
-        <p class="stress-lead">
-          10 ta qisqa savol orqali hissiy bosim, uyqu-energiya, ish/o‘qish,
-          munosabatlar va ortiqcha o‘ylash bo‘yicha hozirgi holatingiz ko‘rinadi.
-        </p>
-
-        <div class="stress-grid" aria-label="Test haqida">
-          <div class="stress-benefit">10 ta random savol</div>
-          <div class="stress-benefit">5 ta stress yo‘nalishi</div>
-          <div class="stress-benefit">3 ta amaliy tavsiya</div>
+  <body class="qadam-intro-body qadam-intro-body--stress">
+    <main class="qadam-intro-shell">
+      <section class="qadam-intro-card qadam-intro-card--banner" aria-label="Stress testi">
+        <div class="brand-banner">
+          <img src="/static/img/qadam-banner.png" alt="Qadam banner">
         </div>
+        <div class="content-section">
+        <header class="qadam-intro-header">
+          <p class="qadam-intro-kicker">QADAM STRESS TEST</p>
+          <h1 class="qadam-intro-title">So‘nggi paytlarda o‘zingizni charchagan his qilyapsizmi?</h1>
+          <p class="qadam-intro-lead">
+            10 ta savol orqali hozirgi ruhiy bosim, energiya va ortiqcha o‘ylash holatingizni
+            yaxshiroq tushunasiz.
+          </p>
+        </header>
 
-        <form method="post" action="/stress/start">
-          <button class="stress-btn" type="submit">Stress testni boshlash</button>
-        </form>
-        <p class="stress-note">Bu tibbiy tashxis emas, o‘z holatingizni yaxshiroq tushunish uchun tezkor ko‘rsatkich.</p>
+        <ul class="qadam-intro-benefits qadam-intro-benefits--grid" aria-label="Nima bilib olasiz">
+          <li class="qadam-intro-benefit">
+            <span class="qadam-intro-benefit__icon" aria-hidden="true"></span>
+            <span>Energiya darajangiz</span>
+          </li>
+          <li class="qadam-intro-benefit">
+            <span class="qadam-intro-benefit__icon" aria-hidden="true"></span>
+            <span>Ruhiy bosim manbalari</span>
+          </li>
+          <li class="qadam-intro-benefit">
+            <span class="qadam-intro-benefit__icon" aria-hidden="true"></span>
+            <span>Stressga moyilligingiz</span>
+          </li>
+          <li class="qadam-intro-benefit">
+            <span class="qadam-intro-benefit__icon" aria-hidden="true"></span>
+            <span>3 ta amaliy tavsiya</span>
+          </li>
+        </ul>
+
+        <div class="qadam-intro-cta">
+          <form class="qadam-intro-form" method="post" action="/stress/start">
+            <button class="qadam-intro-btn" type="submit">Holatimni tekshirish →</button>
+          </form>
+          <p class="qadam-intro-note">
+            Bu tibbiy tashxis emas, o‘zingizni yaxshiroq tushunish uchun tezkor ko‘rsatkich.
+          </p>
+        </div>
+        </div>
       </section>
     </main>
   </body>
