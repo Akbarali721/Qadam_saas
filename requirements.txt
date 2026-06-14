@@ -5,3 +5,4 @@ pydantic==2.6.4
 reportlab==4.5.0
 psycopg2-binary
 jinja2
+python-multipart
